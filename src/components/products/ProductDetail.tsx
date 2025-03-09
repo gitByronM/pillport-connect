@@ -15,6 +15,7 @@ import {
 import { Link } from 'react-router-dom';
 import PharmacyAvailability from './PharmacyAvailability';
 import { toast } from "sonner";
+import ProductGrid from './ProductGrid';
 
 // Example product data
 const productData = {
@@ -268,6 +269,34 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id = 1 }) => {
 
       {/* Pharmacy Availability Section */}
       <PharmacyAvailability productId={id || 1} productName={productData.name} />
+      
+      {/* Related Products Section */}
+      <section className="mt-16">
+        <div className="border-b border-gray-200 mb-6">
+          <h2 className="text-2xl font-bold pb-4">Related Products</h2>
+        </div>
+        <ProductGrid 
+          title="" 
+          subtitle="" 
+          compact={true}
+          filter="related"
+          productIds={productData.relatedProducts}
+        />
+      </section>
+      
+      {/* Same Brand Products Section */}
+      <section className="mt-16">
+        <div className="border-b border-gray-200 mb-6">
+          <h2 className="text-2xl font-bold pb-4">More from {productData.brand}</h2>
+        </div>
+        <ProductGrid 
+          title="" 
+          subtitle="" 
+          compact={true}
+          filter="brand"
+          filterValue={productData.brand}
+        />
+      </section>
       
       {/* Back button */}
       <div className="mt-10">

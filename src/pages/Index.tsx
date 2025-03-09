@@ -13,7 +13,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow mt-16">
+      <main className="flex-grow mt-24">
         <Hero />
         
         {/* Categories Carousel */}

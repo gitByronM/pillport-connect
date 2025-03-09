@@ -13,7 +13,7 @@ const ProductDetails = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow mt-20 py-16 px-4">
+      <main className="flex-grow mt-28 py-10 px-4">
         <div className="container mx-auto max-w-6xl">
           <ProductDetail id={productId} />
         </div>

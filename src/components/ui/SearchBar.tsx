@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onClose?: () => void;
+  compact?: boolean;
 }
 
 // Mock data for suggestions
@@ -16,17 +18,18 @@ const suggestions = [
   { id: 6, name: 'Omeprazole', category: 'Digestive Health' },
 ];
 
-const SearchBar: React.FC<SearchBarProps> = ({ onClose }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onClose, compact = false }) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState(suggestions);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && !compact) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [compact]);
   
   useEffect(() => {
     if (query) {
@@ -43,16 +46,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      console.log('Searching for:', query);
-      // Here you would typically navigate to search results
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className={`w-full ${!compact ? 'max-w-4xl mx-auto' : ''}`}>
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center">
-          <Search className="absolute left-4 w-5 h-5 text-muted-foreground" />
+          <Search className={`absolute left-3 w-5 h-5 text-muted-foreground ${compact ? 'w-4 h-4' : ''}`} />
           <input
             ref={inputRef}
             type="text"
@@ -60,17 +67,21 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClose }) => {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 100)}
-            placeholder="Search for medications, symptoms, categories..."
-            className="w-full pl-12 pr-10 py-3 rounded-full border border-gray-200 bg-gray-50 focus:bg-white transition-all duration-300 focus:ring-2 focus:ring-pharma-300 focus:border-transparent outline-none"
+            placeholder={compact ? "Search products..." : "Search for medications, symptoms, categories..."}
+            className={`w-full ${
+              compact 
+                ? 'pl-9 pr-8 py-2 text-sm rounded-lg' 
+                : 'pl-12 pr-10 py-3 rounded-full'
+            } border border-gray-200 bg-gray-50 focus:bg-white transition-all duration-300 focus:ring-2 focus:ring-pharma-300 focus:border-transparent outline-none`}
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="absolute right-4 text-muted-foreground hover:text-foreground transition-colors"
+              className={`absolute ${compact ? 'right-3' : 'right-4'} text-muted-foreground hover:text-foreground transition-colors`}
               aria-label="Clear search"
             >
-              <X className="w-5 h-5" />
+              <X className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} />
             </button>
           )}
         </div>
@@ -93,7 +104,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClose }) => {
                 <li 
                   key={item.id}
                   className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer flex justify-between"
-                  onClick={() => setQuery(item.name)}
+                  onClick={() => handleSuggestionClick(item.name)}
                 >
                   <span className="font-medium">{item.name}</span>
                   <span className="text-sm text-muted-foreground">{item.category}</span>
