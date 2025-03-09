@@ -13,6 +13,8 @@ import {
   Info
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PharmacyAvailability from './PharmacyAvailability';
+import { toast } from "sonner";
 
 // Example product data
 const productData = {
@@ -54,6 +56,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id = 1 }) => {
     if (quantity > 1) {
       setQuantity(prev => prev - 1);
     }
+  };
+
+  const handleAddToCart = () => {
+    toast.success(`Added ${quantity} ${quantity > 1 ? 'items' : 'item'} to cart`, {
+      description: `${productData.name} - $${(productData.price * quantity).toFixed(2)}`,
+      duration: 3000
+    });
   };
   
   return (
@@ -165,7 +174,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id = 1 }) => {
           
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mb-8">
-            <button className="flex-1 flex items-center justify-center px-6 py-3 bg-pharma-600 text-white rounded-lg hover:bg-pharma-700 transition-colors">
+            <button 
+              className="flex-1 flex items-center justify-center px-6 py-3 bg-pharma-600 text-white rounded-lg hover:bg-pharma-700 transition-colors"
+              onClick={handleAddToCart}
+            >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Add to Cart
             </button>
@@ -253,6 +265,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ id = 1 }) => {
           </div>
         </div>
       </div>
+
+      {/* Pharmacy Availability Section */}
+      <PharmacyAvailability productId={id || 1} productName={productData.name} />
       
       {/* Back button */}
       <div className="mt-10">
