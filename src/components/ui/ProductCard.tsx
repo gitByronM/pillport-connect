@@ -11,6 +11,7 @@ interface ProductCardProps {
   imageSrc: string;
   category: string;
   inStock: boolean;
+  compact?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -20,8 +21,53 @@ const ProductCard: React.FC<ProductCardProps> = ({
   price,
   imageSrc,
   category,
-  inStock
+  inStock,
+  compact = false
 }) => {
+  if (compact) {
+    return (
+      <div className="bg-white rounded-lg overflow-hidden hover-card border border-gray-100">
+        <div className="relative">
+          <Link to={`/product/${id}`}>
+            <img 
+              src={imageSrc} 
+              alt={name}
+              className="w-full h-32 object-cover transition-transform duration-500 hover:scale-105"
+            />
+          </Link>
+          {!inStock && (
+            <div className="absolute top-0 left-0 right-0 bg-amber-500/80 text-white text-xs font-medium text-center py-1">
+              Out of Stock
+            </div>
+          )}
+        </div>
+        
+        <div className="p-3">
+          <Link to={`/product/${id}`}>
+            <h3 className="font-medium text-sm tracking-tight mb-1 hover:text-pharma-600 transition-colors line-clamp-2">
+              {name}
+            </h3>
+          </Link>
+          
+          <div className="flex items-center justify-between mt-2">
+            <span className="font-bold text-sm">${price.toFixed(2)}</span>
+            
+            <button 
+              disabled={!inStock}
+              className={`p-1.5 rounded-full ${
+                inStock 
+                  ? 'bg-pharma-600 text-white hover:bg-pharma-700' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              } transition-colors`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl overflow-hidden hover-card border border-gray-100">
       <div className="relative">

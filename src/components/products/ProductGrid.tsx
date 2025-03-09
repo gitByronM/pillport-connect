@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../ui/ProductCard';
 import { Grid, List, SlidersHorizontal, ChevronDown } from 'lucide-react';
 
@@ -12,7 +12,9 @@ const products = [
     price: 12.99,
     imageSrc: "https://images.unsplash.com/photo-1626285829162-35f3f40c3352?auto=format&fit=crop&q=80&w=1000",
     category: "Pain Relief",
-    inStock: true
+    categoryId: 1,
+    inStock: true,
+    isOnSale: false
   },
   {
     id: 2,
@@ -21,7 +23,9 @@ const products = [
     price: 15.49,
     imageSrc: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1000",
     category: "Vitamins",
-    inStock: true
+    categoryId: 5,
+    inStock: true,
+    isOnSale: true
   },
   {
     id: 3,
@@ -30,7 +34,9 @@ const products = [
     price: 18.99,
     imageSrc: "https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&q=80&w=1000",
     category: "Allergy Relief",
-    inStock: false
+    categoryId: 1,
+    inStock: false,
+    isOnSale: false
   },
   {
     id: 4,
@@ -39,7 +45,9 @@ const products = [
     price: 10.99,
     imageSrc: "https://images.unsplash.com/photo-1550572017-37b18a813b0f?auto=format&fit=crop&q=80&w=1000",
     category: "Pain Relief",
-    inStock: true
+    categoryId: 1,
+    inStock: true,
+    isOnSale: true
   },
   {
     id: 5,
@@ -48,7 +56,9 @@ const products = [
     price: 22.99,
     imageSrc: "https://images.unsplash.com/photo-1577174881658-0f30ed549adc?auto=format&fit=crop&q=80&w=1000",
     category: "Supplements",
-    inStock: true
+    categoryId: 5,
+    inStock: true,
+    isOnSale: false
   },
   {
     id: 6,
@@ -57,7 +67,9 @@ const products = [
     price: 19.99,
     imageSrc: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&q=80&w=1000",
     category: "Vitamins",
-    inStock: true
+    categoryId: 5,
+    inStock: true,
+    isOnSale: false
   },
   {
     id: 7,
@@ -66,7 +78,9 @@ const products = [
     price: 14.49,
     imageSrc: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&q=80&w=1000",
     category: "Cold & Flu",
-    inStock: false
+    categoryId: 1,
+    inStock: false,
+    isOnSale: true
   },
   {
     id: 8,
@@ -75,21 +89,101 @@ const products = [
     price: 29.99,
     imageSrc: "https://images.unsplash.com/photo-1588776814546-daab30f310ce?auto=format&fit=crop&q=80&w=1000",
     category: "Medical Devices",
-    inStock: true
+    categoryId: 7,
+    inStock: true,
+    isOnSale: false
+  },
+  {
+    id: 9,
+    name: "Baby Shampoo",
+    description: "Gentle, tear-free formula for babies. Hypoallergenic and dermatologist tested.",
+    price: 8.99,
+    imageSrc: "https://images.unsplash.com/photo-1607782994386-f8ed7f2df25e?auto=format&fit=crop&q=80&w=1000",
+    category: "Baby Care",
+    categoryId: 3,
+    inStock: true,
+    isOnSale: false
+  },
+  {
+    id: 10,
+    name: "Baby Wipes",
+    description: "Gentle and moisturizing wipes for sensitive skin. Alcohol-free and fragrance-free.",
+    price: 5.99,
+    imageSrc: "https://images.unsplash.com/photo-1591377677982-3f0e23687df2?auto=format&fit=crop&q=80&w=1000",
+    category: "Baby Care",
+    categoryId: 3,
+    inStock: true,
+    isOnSale: true
   }
 ];
 
 interface ProductGridProps {
   title?: string;
   subtitle?: string;
+  categoryId?: number | null;
+  searchQuery?: string;
+  filter?: string;
+  compact?: boolean;
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ 
   title = "All Products", 
-  subtitle = "Browse our complete catalog of medications and health products."
+  subtitle = "Browse our complete catalog of medications and health products.",
+  categoryId = null,
+  searchQuery = "",
+  filter = "",
+  compact = false
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  
+  // Filter products based on category, search query, or filter
+  useEffect(() => {
+    let result = [...products];
+    
+    // Filter by category
+    if (categoryId !== null) {
+      result = result.filter(product => product.categoryId === categoryId);
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(product => 
+        product.name.toLowerCase().includes(query) || 
+        product.description.toLowerCase().includes(query) || 
+        product.category.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filter by special filters
+    if (filter === 'deals') {
+      result = result.filter(product => product.isOnSale);
+    }
+    
+    setFilteredProducts(result);
+  }, [categoryId, searchQuery, filter]);
+  
+  if (compact) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {filteredProducts.slice(0, 5).map(product => (
+          <ProductCard
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            description={product.description}
+            price={product.price}
+            imageSrc={product.imageSrc}
+            category={product.category}
+            inStock={product.inStock}
+            compact={true}
+          />
+        ))}
+      </div>
+    );
+  }
   
   return (
     <div>
@@ -206,21 +300,32 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       )}
       
+      {/* Empty state */}
+      {filteredProducts.length === 0 && (
+        <div className="py-16 text-center">
+          <h3 className="text-xl font-medium mb-2">No products found</h3>
+          <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
+          <a href="/products" className="text-pharma-600 hover:underline">View all products</a>
+        </div>
+      )}
+      
       {/* Products grid */}
-      <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'} gap-6`}>
-        {products.map(product => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            description={product.description}
-            price={product.price}
-            imageSrc={product.imageSrc}
-            category={product.category}
-            inStock={product.inStock}
-          />
-        ))}
-      </div>
+      {filteredProducts.length > 0 && (
+        <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'} gap-6`}>
+          {filteredProducts.map(product => (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              description={product.description}
+              price={product.price}
+              imageSrc={product.imageSrc}
+              category={product.category}
+              inStock={product.inStock}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

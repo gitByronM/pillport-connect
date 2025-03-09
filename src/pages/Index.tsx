@@ -3,9 +3,10 @@ import React from 'react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Hero from '../components/home/Hero';
-import Features from '../components/home/Features';
-import CategorySection from '../components/home/CategorySection';
+import CategoryCarousel from '../components/home/CategoryCarousel';
 import ProductGrid from '../components/products/ProductGrid';
+import PromotionBanner from '../components/home/PromotionBanner';
+import FeaturedCategories from '../components/home/FeaturedCategories';
 
 const Index = () => {
   return (
@@ -14,25 +15,44 @@ const Index = () => {
       
       <main className="flex-grow mt-16">
         <Hero />
-        <Features />
-        <CategorySection />
         
-        <section className="py-16 px-4">
+        {/* Categories Carousel */}
+        <CategoryCarousel />
+        
+        {/* Promotion Banner */}
+        <PromotionBanner />
+        
+        {/* Featured Categories */}
+        <FeaturedCategories />
+        
+        {/* Featured Products Section */}
+        <section className="py-12 px-4 bg-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
+            <div className="flex justify-between items-end mb-6">
+              <h2 className="text-2xl font-bold">Featured Products</h2>
+              <a href="/products" className="text-pharma-600 hover:underline text-sm font-medium">View All</a>
+            </div>
             <ProductGrid 
               title="" 
               subtitle="" 
+              compact={true}
             />
-            
-            <div className="mt-10 flex justify-center">
-              <a 
-                href="/products" 
-                className="px-6 py-3 bg-pharma-600 text-white rounded-full hover:bg-pharma-700 transition-colors font-medium"
-              >
-                View All Products
-              </a>
+          </div>
+        </section>
+        
+        {/* Daily Deals Section */}
+        <section className="py-12 px-4 bg-gray-50">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex justify-between items-end mb-6">
+              <h2 className="text-2xl font-bold">Daily Deals</h2>
+              <a href="/products?deals=true" className="text-pharma-600 hover:underline text-sm font-medium">View All</a>
             </div>
+            <ProductGrid 
+              title="" 
+              subtitle="" 
+              compact={true}
+              filter="deals"
+            />
           </div>
         </section>
       </main>
