@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../ui/ProductCard';
 import { Grid, List, SlidersHorizontal, ChevronDown } from 'lucide-react';
@@ -123,7 +122,9 @@ interface ProductGridProps {
   categoryId?: number | null;
   searchQuery?: string;
   filter?: string;
+  filterValue?: string;
   compact?: boolean;
+  productIds?: number[];
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ 
@@ -132,22 +133,23 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   categoryId = null,
   searchQuery = "",
   filter = "",
-  compact = false
+  filterValue = "",
+  compact = false,
+  productIds = []
 }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [filteredProducts, setFilteredProducts] = useState(products);
   
-  // Filter products based on category, search query, or filter
   useEffect(() => {
     let result = [...products];
     
-    // Filter by category
-    if (categoryId !== null) {
+    if (productIds && productIds.length > 0) {
+      result = result.filter(product => productIds.includes(product.id));
+    } else if (categoryId !== null) {
       result = result.filter(product => product.categoryId === categoryId);
     }
     
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(product => 
@@ -157,13 +159,16 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       );
     }
     
-    // Filter by special filters
     if (filter === 'deals') {
       result = result.filter(product => product.isOnSale);
+    } else if (filter === 'brand' && filterValue) {
+      result = result.filter(product => product.brand === filterValue);
+    } else if (filter === 'related' && productIds) {
+      result = result.filter(product => productIds.includes(product.id));
     }
     
     setFilteredProducts(result);
-  }, [categoryId, searchQuery, filter]);
+  }, [categoryId, searchQuery, filter, filterValue, productIds]);
   
   if (compact) {
     return (
@@ -193,7 +198,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
       
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
-        {/* Filters button */}
         <button 
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -203,7 +207,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
         </button>
         
-        {/* Right side controls */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <button 
@@ -232,7 +235,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       </div>
       
-      {/* Expandable filters */}
       {showFilters && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 animate-slide-down">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -300,7 +302,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       )}
       
-      {/* Empty state */}
       {filteredProducts.length === 0 && (
         <div className="py-16 text-center">
           <h3 className="text-xl font-medium mb-2">No products found</h3>
@@ -309,7 +310,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       )}
       
-      {/* Products grid */}
       {filteredProducts.length > 0 && (
         <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1'} gap-6`}>
           {filteredProducts.map(product => (
