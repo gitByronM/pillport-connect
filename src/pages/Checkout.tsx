@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useCart } from '@/components/cart/CartProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Check, Edit, CreditCard, PaypalLogo, Truck, Clock, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Check, Edit, CreditCard, Wallet, Truck, Clock, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PaymentMethod = {
@@ -30,7 +29,6 @@ const Checkout = () => {
   const [promoApplied, setPromoApplied] = useState(false);
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
 
-  // Example address data (in a real app, this would come from the user's account)
   const [shippingAddress] = useState({
     name: 'John Smith',
     street: '123 Main Street',
@@ -42,17 +40,15 @@ const Checkout = () => {
     phone: '(555) 123-4567'
   });
 
-  // Calculate totals
   const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-  const originalPrice = subtotal * 1.15; // Just for demo to show "savings"
+  const originalPrice = subtotal * 1.15;
   const savings = originalPrice - subtotal;
-  const discount = promoApplied ? subtotal * 0.1 : 0; // 10% discount with promo
+  const discount = promoApplied ? subtotal * 0.1 : 0;
   const shippingCost = shippingMethod === ShippingMethod.STANDARD ? 4.99 : 
                        shippingMethod === ShippingMethod.EXPRESS ? 9.99 : 0;
-  const tax = (subtotal - discount) * 0.08; // 8% tax
+  const tax = (subtotal - discount) * 0.08;
   const total = subtotal - discount + shippingCost + tax;
 
-  // Get estimated delivery date based on shipping method
   const getEstimatedDelivery = () => {
     const today = new Date();
     let days;
@@ -79,7 +75,6 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = () => {
-    // In a real app, would submit order to backend
     alert('Order placed! Thank you for your purchase.');
   };
 
@@ -99,9 +94,7 @@ const Checkout = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-8">Checkout</h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main checkout column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Delivery Address */}
               <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Delivery Address</h2>
@@ -133,7 +126,6 @@ const Checkout = () => {
                 </div>
               </div>
               
-              {/* Payment Method */}
               <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
                 
@@ -178,7 +170,7 @@ const Checkout = () => {
                     />
                     <div className="ml-3 flex-grow">
                       <span className="font-medium flex items-center">
-                        <PaypalLogo className="w-5 h-5 mr-2 text-gray-700" />
+                        <Wallet className="w-5 h-5 mr-2 text-gray-700" />
                         PayPal
                       </span>
                       <p className="text-sm text-gray-500 mt-1">Fast, secure payment with PayPal</p>
@@ -255,7 +247,6 @@ const Checkout = () => {
                 )}
               </div>
               
-              {/* Shipping Options */}
               <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <h2 className="text-xl font-semibold mb-4">Shipping Method</h2>
                 
@@ -342,12 +333,10 @@ const Checkout = () => {
               </div>
             </div>
             
-            {/* Order Summary Column */}
             <div className="lg:col-span-1">
               <div className="bg-white p-6 rounded-lg border border-gray-200 sticky top-32">
                 <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                 
-                {/* Order Items Preview */}
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium text-gray-700">Items ({items.reduce((sum, item) => sum + item.quantity, 0)})</h3>
@@ -372,7 +361,6 @@ const Checkout = () => {
                   </div>
                 </div>
                 
-                {/* Promo Code */}
                 {!promoApplied ? (
                   <div className="mb-6">
                     <label htmlFor="promo-code" className="block text-sm font-medium mb-1">Promo Code</label>
@@ -401,7 +389,6 @@ const Checkout = () => {
                   </div>
                 )}
                 
-                {/* Price Breakdown */}
                 <div className="space-y-3 border-t border-b border-gray-200 py-4 mb-4">
                   {originalPrice > subtotal && (
                     <div className="flex justify-between">
@@ -444,13 +431,11 @@ const Checkout = () => {
                   </div>
                 </div>
                 
-                {/* Total */}
                 <div className="flex justify-between font-bold text-lg mb-6">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
                 
-                {/* Place Order Button */}
                 <button
                   onClick={handlePlaceOrder}
                   className="w-full bg-pharma-600 text-white py-3 rounded-md font-medium text-base hover:bg-pharma-700 transition-colors mb-4"
@@ -458,7 +443,6 @@ const Checkout = () => {
                   Place Order
                 </button>
                 
-                {/* Security Note */}
                 <div className="text-center">
                   <div className="flex items-center justify-center text-gray-500 text-sm mb-2">
                     <ShieldCheck className="w-4 h-4 mr-1" />
