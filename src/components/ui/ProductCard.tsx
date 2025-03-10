@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
+import { useCart } from '@/components/cart/CartProvider';
 
 interface ProductCardProps {
   id: number;
@@ -24,6 +25,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
   inStock,
   compact = false
 }) => {
+  const { addToCart } = useCart();
+  const product = { id, name, description, price, imageSrc, category, inStock, categoryId: 0, isOnSale: false, brand: "" };
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inStock) {
+      addToCart(product);
+    }
+  };
+
   if (compact) {
     return (
       <div className="bg-white rounded-lg overflow-hidden hover-card border border-gray-100">
@@ -54,6 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             
             <button 
               disabled={!inStock}
+              onClick={handleAddToCart}
               className={`p-1.5 rounded-full ${
                 inStock 
                   ? 'bg-pharma-600 text-white hover:bg-pharma-700' 
@@ -114,6 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             
             <button 
               disabled={!inStock}
+              onClick={handleAddToCart}
               className={`p-2 rounded-full ${
                 inStock 
                   ? 'bg-pharma-600 text-white hover:bg-pharma-700' 

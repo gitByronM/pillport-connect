@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Product } from '../products/ProductGrid';
+import { Link } from 'react-router-dom';
 
 interface CartSummaryProps {
   items: { product: Product; quantity: number }[];
@@ -76,9 +77,9 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, compact = false }) => 
           </div>
         )}
         
-        <button className="w-full mt-4 bg-pharma-600 text-white py-2 rounded-md font-medium hover:bg-pharma-700 transition-colors">
+        <Link to="/checkout" className="w-full mt-4 bg-pharma-600 text-white py-2 rounded-md font-medium hover:bg-pharma-700 transition-colors flex items-center justify-center">
           Proceed to checkout
-        </button>
+        </Link>
       </div>
     );
   }
@@ -146,9 +147,9 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, compact = false }) => 
         )}
       </div>
       
-      <button className="w-full mt-6 bg-pharma-600 text-white py-3 rounded-md font-medium text-base hover:bg-pharma-700 transition-colors">
+      <Link to="/checkout" className="w-full mt-6 bg-pharma-600 text-white py-3 rounded-md font-medium text-base hover:bg-pharma-700 transition-colors flex items-center justify-center">
         Continue to checkout
-      </button>
+      </Link>
       
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-500">
