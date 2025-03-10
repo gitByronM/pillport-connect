@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, User } from 'lucide-react';
 import SearchBar from '../ui/SearchBar';
+import { useCart } from '@/components/cart/CartProvider';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,6 +12,7 @@ const Navbar = () => {
   const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  const { openCart, itemCount } = useCart();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -86,12 +88,18 @@ const Navbar = () => {
                 <Search className="w-5 h-5" />
               </button>
             )}
-            <Link to="/cart" className="text-muted-foreground hover:text-foreground transition-colors relative">
+            <button 
+              onClick={openCart} 
+              className="text-muted-foreground hover:text-foreground transition-colors relative"
+              aria-label="Cart"
+            >
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-2 -right-2 bg-pharma-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-pharma-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </button>
             <Link to="/account" className="text-muted-foreground hover:text-foreground transition-colors">
               <User className="w-5 h-5" />
             </Link>
@@ -200,12 +208,20 @@ const Navbar = () => {
           <div className="h-px bg-gray-200 my-2"></div>
           
           <div className="flex items-center space-x-6 pt-2">
-            <Link to="/cart" className="text-muted-foreground hover:text-foreground transition-colors relative">
+            <button 
+              onClick={() => {
+                openCart();
+                setIsMenuOpen(false);
+              }} 
+              className="text-muted-foreground hover:text-foreground transition-colors relative"
+            >
               <ShoppingCart className="w-5 h-5" />
-              <span className="absolute -top-2 -right-2 bg-pharma-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-pharma-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </button>
             <Link to="/account" className="text-muted-foreground hover:text-foreground transition-colors">
               <User className="w-5 h-5" />
             </Link>

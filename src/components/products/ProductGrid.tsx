@@ -1,124 +1,177 @@
+
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../ui/ProductCard';
 import { Grid, List, SlidersHorizontal, ChevronDown } from 'lucide-react';
 
-// Mock data
+// Sample products data for demo purposes
 const products = [
   {
     id: 1,
-    name: "Aspirin 100mg",
-    description: "Pain reliever and fever reducer. Used to treat mild to moderate pain, and also to reduce fever or inflammation.",
+    name: "Pain Relief Extra Strength",
+    description: "Fast-acting pain relief for headaches, muscle aches, and minor arthritis pain. Contains 500mg acetaminophen per caplet.",
     price: 12.99,
-    imageSrc: "https://images.unsplash.com/photo-1626285829162-35f3f40c3352?auto=format&fit=crop&q=80&w=1000",
+    imageSrc: "/placeholder.svg",
     category: "Pain Relief",
     categoryId: 1,
     inStock: true,
-    isOnSale: false
+    isOnSale: true,
+    brand: "PharmaCare"
   },
   {
     id: 2,
-    name: "Vitamin C 1000mg",
-    description: "Supports immune health and antioxidant support. Essential for the growth and repair of tissues.",
-    price: 15.49,
-    imageSrc: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=1000",
-    category: "Vitamins",
-    categoryId: 5,
+    name: "Allergy Relief 24-Hour",
+    description: "Non-drowsy allergy relief that provides 24-hour relief from indoor and outdoor allergies.",
+    price: 18.49,
+    imageSrc: "/placeholder.svg",
+    category: "Allergy",
+    categoryId: 2,
     inStock: true,
-    isOnSale: true
+    isOnSale: false,
+    brand: "AllerEase"
   },
   {
     id: 3,
-    name: "Cetirizine 10mg",
-    description: "Antihistamine used to relieve allergy symptoms such as watery eyes, runny nose, itching eyes/nose, and sneezing.",
-    price: 18.99,
-    imageSrc: "https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&q=80&w=1000",
-    category: "Allergy Relief",
-    categoryId: 1,
+    name: "Digital Thermometer",
+    description: "Fast and accurate digital thermometer with flexible tip for comfort.",
+    price: 15.99,
+    imageSrc: "/placeholder.svg",
+    category: "First Aid",
+    categoryId: 3,
     inStock: false,
-    isOnSale: false
+    isOnSale: false,
+    brand: "MediTech"
   },
   {
     id: 4,
-    name: "Ibuprofen 400mg",
-    description: "Nonsteroidal anti-inflammatory drug used to reduce fever and treat pain or inflammation.",
-    price: 10.99,
-    imageSrc: "https://images.unsplash.com/photo-1550572017-37b18a813b0f?auto=format&fit=crop&q=80&w=1000",
-    category: "Pain Relief",
-    categoryId: 1,
+    name: "Vitamin D3 5000 IU",
+    description: "High-potency vitamin D3 supplement to support bone health and immune function.",
+    price: 14.95,
+    imageSrc: "/placeholder.svg",
+    category: "Vitamins",
+    categoryId: 4,
     inStock: true,
-    isOnSale: true
+    isOnSale: true,
+    brand: "VitaWell"
   },
   {
     id: 5,
-    name: "Omega-3 Fish Oil",
-    description: "Supports heart, brain, joint, and eye health. Rich in EPA and DHA fatty acids.",
-    price: 22.99,
-    imageSrc: "https://images.unsplash.com/photo-1577174881658-0f30ed549adc?auto=format&fit=crop&q=80&w=1000",
-    category: "Supplements",
-    categoryId: 5,
+    name: "First Aid Kit - Family Size",
+    description: "Comprehensive first aid kit with 150 items for treating minor injuries at home or on the go.",
+    price: 29.99,
+    imageSrc: "/placeholder.svg",
+    category: "First Aid",
+    categoryId: 3,
     inStock: true,
-    isOnSale: false
+    isOnSale: false,
+    brand: "SafeGuard"
   },
   {
     id: 6,
-    name: "Multivitamin Complex",
-    description: "Complete daily vitamin with minerals. Supports overall health and wellbeing.",
-    price: 19.99,
-    imageSrc: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&q=80&w=1000",
-    category: "Vitamins",
+    name: "Probiotic Digestive Support",
+    description: "10 billion CFU probiotic supplement to support gut health and digestive balance.",
+    price: 21.99,
+    imageSrc: "/placeholder.svg",
+    category: "Digestive",
     categoryId: 5,
     inStock: true,
-    isOnSale: false
+    isOnSale: false,
+    brand: "GutHealth"
   },
   {
     id: 7,
-    name: "Nasal Spray Solution",
-    description: "Fast relief from nasal congestion due to colds, allergies, and sinus problems.",
-    price: 14.49,
-    imageSrc: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?auto=format&fit=crop&q=80&w=1000",
+    name: "Children's Cough Syrup",
+    description: "Berry-flavored cough syrup safe for children ages 4 and up.",
+    price: 8.99,
+    imageSrc: "/placeholder.svg",
     category: "Cold & Flu",
-    categoryId: 1,
-    inStock: false,
-    isOnSale: true
+    categoryId: 6,
+    inStock: true,
+    isOnSale: true,
+    brand: "KidCare"
   },
   {
     id: 8,
-    name: "Digital Thermometer",
-    description: "Fast and accurate temperature readings. Easy to use with clear digital display.",
-    price: 29.99,
-    imageSrc: "https://images.unsplash.com/photo-1588776814546-daab30f310ce?auto=format&fit=crop&q=80&w=1000",
-    category: "Medical Devices",
+    name: "Omega-3 Fish Oil",
+    description: "Purified fish oil supplement with 1000mg Omega-3s for heart and brain health.",
+    price: 16.99,
+    imageSrc: "/placeholder.svg",
+    category: "Supplements",
     categoryId: 7,
     inStock: true,
-    isOnSale: false
+    isOnSale: false,
+    brand: "VitaWell"
   },
   {
     id: 9,
-    name: "Baby Shampoo",
-    description: "Gentle, tear-free formula for babies. Hypoallergenic and dermatologist tested.",
-    price: 8.99,
-    imageSrc: "https://images.unsplash.com/photo-1607782994386-f8ed7f2df25e?auto=format&fit=crop&q=80&w=1000",
-    category: "Baby Care",
-    categoryId: 3,
+    name: "Digital Blood Pressure Monitor",
+    description: "Easy-to-use blood pressure monitor with large digital display and memory function.",
+    price: 49.99,
+    imageSrc: "/placeholder.svg",
+    category: "Medical Devices",
+    categoryId: 8,
     inStock: true,
-    isOnSale: false
+    isOnSale: true,
+    brand: "MediTech"
   },
   {
     id: 10,
-    name: "Baby Wipes",
-    description: "Gentle and moisturizing wipes for sensitive skin. Alcohol-free and fragrance-free.",
-    price: 5.99,
-    imageSrc: "https://images.unsplash.com/photo-1591377677982-3f0e23687df2?auto=format&fit=crop&q=80&w=1000",
-    category: "Baby Care",
-    categoryId: 3,
+    name: "Zinc Lozenges",
+    description: "Cherry-flavored zinc lozenges to support immune health during cold season.",
+    price: 7.49,
+    imageSrc: "/placeholder.svg",
+    category: "Cold & Flu",
+    categoryId: 6,
     inStock: true,
-    isOnSale: true
+    isOnSale: false,
+    brand: "PharmaCare"
+  },
+  {
+    id: 11,
+    name: "Gentle Sleep Aid",
+    description: "Non-habit forming sleep aid with melatonin and herbal extracts.",
+    price: 11.99,
+    imageSrc: "/placeholder.svg",
+    category: "Sleep & Stress",
+    categoryId: 9,
+    inStock: true,
+    isOnSale: false,
+    brand: "SleepWell"
+  },
+  {
+    id: 12,
+    name: "Daily Multivitamin",
+    description: "Complete multivitamin with essential nutrients for overall health maintenance.",
+    price: 19.99,
+    imageSrc: "/placeholder.svg",
+    category: "Vitamins",
+    categoryId: 4,
+    inStock: true,
+    isOnSale: true,
+    brand: "VitaWell"
   }
 ];
 
-interface ProductGridProps {
+// Sample product interface for typing
+export interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageSrc: string;
+  category: string;
+  categoryId: number;
+  inStock: boolean;
+  isOnSale: boolean;
+  brand: string;
+}
+
+// Export products for use in other files
+export { products };
+
+export interface ProductGridProps {
   title?: string;
   subtitle?: string;
+  products?: Product[];
   categoryId?: number | null;
   searchQuery?: string;
   filter?: string;
