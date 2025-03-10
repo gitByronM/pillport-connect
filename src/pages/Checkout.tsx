@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { useCart } from '@/components/cart/CartProvider';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Check, Edit, CreditCard, Wallet, Truck, Clock, ChevronRight, ShieldCheck } from 'lucide-react';
+import { DollarSign, CreditCard, Smartphone, Edit, Truck, Clock, ChevronRight, ShieldCheck, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AddressEditModal from '@/components/checkout/AddressEditModal';
+import MobilePaymentDetails from '@/components/checkout/MobilePaymentDetails';
+import type { PaymentMethodType, MobilePaymentDetails as MobilePaymentDetailsType, ShippingAddress } from '@/types/checkout';
+import { PaymentMethod } from '@/types/checkout';
 
 const PaymentMethod = {
-  CREDIT_CARD: 'credit_card',
-  PAYPAL: 'paypal',
-  APPLE_PAY: 'apple_pay',
+  CASH: 'cash',
+  POS: 'pos',
+  MOBILE: 'mobile'
 } as const;
 
 type PaymentMethodType = typeof PaymentMethod[keyof typeof PaymentMethod];
@@ -16,24 +20,32 @@ type PaymentMethodType = typeof PaymentMethod[keyof typeof PaymentMethod];
 const ShippingMethod = {
   STANDARD: 'standard',
   EXPRESS: 'express',
-  STORE_PICKUP: 'store_pickup',
+  STORE_PICKUP: 'store_pickup'
 } as const;
 
 type ShippingMethodType = typeof ShippingMethod[keyof typeof ShippingMethod];
 
 const Checkout = () => {
   const { items } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>(PaymentMethod.CREDIT_CARD);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>(PaymentMethod.CASH);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethodType>(ShippingMethod.STANDARD);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [deliveryInstructions, setDeliveryInstructions] = useState('');
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [mobilePaymentDetails, setMobilePaymentDetails] = useState<MobilePaymentDetailsType>({
+    bank: 'Banco Nacional',
+    accountNumber: '1234-5678-9012-3456',
+    phone: '(555) 123-4567',
+    referenceId: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+  });
 
-  const [shippingAddress] = useState({
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     name: 'John Smith',
     street: '123 Main Street',
     apt: 'Apt 4B',
     city: 'New York',
+    municipality: 'Manhattan',
     state: 'NY',
     zipCode: '10001',
     country: 'United States',
@@ -78,6 +90,21 @@ const Checkout = () => {
     alert('Order placed! Thank you for your purchase.');
   };
 
+  const handleAddressUpdate = (newAddress: ShippingAddress) => {
+    setShippingAddress(newAddress);
+  };
+
+  const handleProofUpload = (file: File) => {
+    setMobilePaymentDetails(prev => ({ ...prev, proofImage: file }));
+  };
+
+  const canPlaceOrder = () => {
+    if (paymentMethod === PaymentMethod.MOBILE) {
+      return !!mobilePaymentDetails.proofImage;
+    }
+    return true;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -98,7 +125,10 @@ const Checkout = () => {
               <div className="bg-white p-6 rounded-lg border border-gray-200">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Delivery Address</h2>
-                  <button className="text-pharma-600 hover:text-pharma-700 flex items-center text-sm font-medium">
+                  <button 
+                    onClick={() => setIsAddressModalOpen(true)}
+                    className="text-pharma-600 hover:text-pharma-700 flex items-center text-sm font-medium"
+                  >
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </button>
@@ -110,6 +140,9 @@ const Checkout = () => {
                   <p>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.zipCode}</p>
                   <p>{shippingAddress.country}</p>
                   <p className="mt-2">{shippingAddress.phone}</p>
+                  {shippingAddress.additionalInstructions && (
+                    <p className="mt-2 text-gray-600">{shippingAddress.additionalInstructions}</p>
+                  )}
                 </div>
                 
                 <div className="mt-4">
@@ -131,119 +164,75 @@ const Checkout = () => {
                 
                 <div className="space-y-3">
                   <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pharma-200 ${
-                    paymentMethod === PaymentMethod.CREDIT_CARD 
+                    paymentMethod === PaymentMethod.CASH 
                       ? 'border-pharma-500 bg-pharma-50' 
                       : 'border-gray-200'
                   }`}>
                     <input
                       type="radio"
                       name="payment"
-                      checked={paymentMethod === PaymentMethod.CREDIT_CARD}
-                      onChange={() => setPaymentMethod(PaymentMethod.CREDIT_CARD)}
+                      checked={paymentMethod === PaymentMethod.CASH}
+                      onChange={() => setPaymentMethod(PaymentMethod.CASH)}
+                      className="text-pharma-600 focus:ring-pharma-500 h-4 w-4"
+                    />
+                    <div className="ml-3 flex-grow">
+                      <span className="font-medium flex items-center">
+                        <DollarSign className="w-5 h-5 mr-2 text-gray-700" />
+                        Efectivo (Cash)
+                      </span>
+                      <p className="text-sm text-gray-500 mt-1">Pay with cash at delivery</p>
+                    </div>
+                  </label>
+                  
+                  <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pharma-200 ${
+                    paymentMethod === PaymentMethod.POS 
+                      ? 'border-pharma-500 bg-pharma-50' 
+                      : 'border-gray-200'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === PaymentMethod.POS}
+                      onChange={() => setPaymentMethod(PaymentMethod.POS)}
                       className="text-pharma-600 focus:ring-pharma-500 h-4 w-4"
                     />
                     <div className="ml-3 flex-grow">
                       <span className="font-medium flex items-center">
                         <CreditCard className="w-5 h-5 mr-2 text-gray-700" />
-                        Credit / Debit Card
+                        Punto de Venta (POS)
                       </span>
-                      <p className="text-sm text-gray-500 mt-1">Pay securely with your card</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="w-10 h-6 bg-blue-600 rounded"></div>
-                      <div className="w-10 h-6 bg-red-500 rounded"></div>
-                      <div className="w-10 h-6 bg-gray-300 rounded"></div>
+                      <p className="text-sm text-gray-500 mt-1">Pay with card at delivery</p>
                     </div>
                   </label>
                   
                   <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pharma-200 ${
-                    paymentMethod === PaymentMethod.PAYPAL 
+                    paymentMethod === PaymentMethod.MOBILE 
                       ? 'border-pharma-500 bg-pharma-50' 
                       : 'border-gray-200'
                   }`}>
                     <input
                       type="radio"
                       name="payment"
-                      checked={paymentMethod === PaymentMethod.PAYPAL}
-                      onChange={() => setPaymentMethod(PaymentMethod.PAYPAL)}
+                      checked={paymentMethod === PaymentMethod.MOBILE}
+                      onChange={() => setPaymentMethod(PaymentMethod.MOBILE)}
                       className="text-pharma-600 focus:ring-pharma-500 h-4 w-4"
                     />
                     <div className="ml-3 flex-grow">
                       <span className="font-medium flex items-center">
-                        <Wallet className="w-5 h-5 mr-2 text-gray-700" />
-                        PayPal
+                        <Smartphone className="w-5 h-5 mr-2 text-gray-700" />
+                        Pago Móvil
                       </span>
-                      <p className="text-sm text-gray-500 mt-1">Fast, secure payment with PayPal</p>
-                    </div>
-                  </label>
-                  
-                  <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-pharma-200 ${
-                    paymentMethod === PaymentMethod.APPLE_PAY 
-                      ? 'border-pharma-500 bg-pharma-50' 
-                      : 'border-gray-200'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === PaymentMethod.APPLE_PAY}
-                      onChange={() => setPaymentMethod(PaymentMethod.APPLE_PAY)}
-                      className="text-pharma-600 focus:ring-pharma-500 h-4 w-4"
-                    />
-                    <div className="ml-3 flex-grow">
-                      <span className="font-medium flex items-center">
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M14.5 5C15.585 5 16.326 5.28 17 5.75C16.81 6.5 16.333 7 15.667 7.5C15 8 14.22 7.97 13.5 7.75C13.5 6.8 14 6 14.5 5Z" fill="currentColor"/>
-                          <path d="M13.5 8C14.5 8 15.5 8.5 16.5 8.5C17.793 8.5 18.622 7.866 19.45 7.232C20.103 6.753 20.757 6.273 21.5 6.5C21 8 20 9.5 19 10C19 13.655 21.5 15.37 21.5 15.37C21.5 15.37 20.5 17 19.5 17.5C18.745 17.866 18.016 18 17.286 18C16.359 18 15.432 17.77 14.5 17.5C13.573 17.235 12.651 17 11.714 17C10.1 17 8.5 18 7.5 18.5C6 15.5 6 12.5 6 11.5C6 9.5 7.5 8 9 8C10.05 8 10.934 8.25 11.817 8.5C12.7 8.75 13.584 9 14.5 9" fill="currentColor"/>
-                        </svg>
-                        Apple Pay
-                      </span>
-                      <p className="text-sm text-gray-500 mt-1">Quick and easy payments with Apple Pay</p>
+                      <p className="text-sm text-gray-500 mt-1">Pay via mobile transfer</p>
                     </div>
                   </label>
                 </div>
                 
-                {paymentMethod === PaymentMethod.CREDIT_CARD && (
-                  <div className="mt-4 p-4 border border-gray-200 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-3">Credit card information would be collected here in a production app</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="card-number" className="block text-sm font-medium mb-1">Card Number</label>
-                        <input 
-                          type="text" 
-                          id="card-number" 
-                          placeholder="1234 5678 9012 3456" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-pharma-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="card-name" className="block text-sm font-medium mb-1">Name on Card</label>
-                        <input 
-                          type="text" 
-                          id="card-name" 
-                          placeholder="John Smith" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-pharma-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="card-expiry" className="block text-sm font-medium mb-1">Expiry Date</label>
-                        <input 
-                          type="text" 
-                          id="card-expiry" 
-                          placeholder="MM/YY" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-pharma-500"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="card-cvv" className="block text-sm font-medium mb-1">CVV</label>
-                        <input 
-                          type="text" 
-                          id="card-cvv" 
-                          placeholder="123" 
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-pharma-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                {paymentMethod === PaymentMethod.MOBILE && (
+                  <MobilePaymentDetails
+                    details={mobilePaymentDetails}
+                    amount={total}
+                    onProofUpload={handleProofUpload}
+                  />
                 )}
               </div>
               
@@ -438,7 +427,12 @@ const Checkout = () => {
                 
                 <button
                   onClick={handlePlaceOrder}
-                  className="w-full bg-pharma-600 text-white py-3 rounded-md font-medium text-base hover:bg-pharma-700 transition-colors mb-4"
+                  disabled={!canPlaceOrder()}
+                  className={`w-full bg-pharma-600 text-white py-3 rounded-md font-medium text-base transition-colors mb-4 ${
+                    canPlaceOrder() 
+                      ? 'hover:bg-pharma-700' 
+                      : 'opacity-50 cursor-not-allowed'
+                  }`}
                 >
                   Place Order
                 </button>
@@ -457,6 +451,13 @@ const Checkout = () => {
           </div>
         </div>
       </main>
+      
+      <AddressEditModal
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        currentAddress={shippingAddress}
+        onSave={handleAddressUpdate}
+      />
       
       <Footer />
     </div>
