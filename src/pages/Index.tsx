@@ -7,8 +7,12 @@ import CategoryCarousel from '../components/home/CategoryCarousel';
 import ProductGrid from '../components/products/ProductGrid';
 import PromotionBanner from '../components/home/PromotionBanner';
 import FeaturedCategories from '../components/home/FeaturedCategories';
+import { useCart } from '@/components/cart/CartProvider';
+import CartSidebar from '@/components/cart/CartSidebar';
 
 const Index = () => {
+  const { items, updateQuantity, removeFromCart, isCartOpen, closeCart } = useCart();
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -56,6 +60,15 @@ const Index = () => {
           </div>
         </section>
       </main>
+      
+      {/* Add CartSidebar component to the homepage */}
+      <CartSidebar 
+        isOpen={isCartOpen}
+        onClose={closeCart}
+        items={items}
+        onQuantityChange={updateQuantity}
+        onRemove={removeFromCart}
+      />
       
       <Footer />
     </div>

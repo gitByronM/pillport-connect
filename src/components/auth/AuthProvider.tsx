@@ -1,5 +1,5 @@
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState } from 'react';
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import { AuthDialogType } from '@/types/auth';
 import AuthDialog from './AuthDialog';
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authType,
     openAuth,
     closeAuth,
+    switchAuthType
   } = useAuthHook();
 
   // Mock authentication state - in a real app, this would be connected to your backend
@@ -41,12 +42,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ openAuth, closeAuth, isAuthenticated, user, logout }}>
+      {children}
       <AuthDialog 
         isOpen={isAuthOpen} 
         onClose={closeAuth} 
         defaultType={authType} 
       />
-      {children}
     </AuthContext.Provider>
   );
 };
