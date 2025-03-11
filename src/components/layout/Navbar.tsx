@@ -4,6 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, User } from 'lucide-react';
 import SearchBar from '../ui/SearchBar';
 import { useCart } from '@/components/cart/CartProvider';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,6 +15,7 @@ const Navbar = () => {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const { openCart, itemCount } = useCart();
+  const { openAuth } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -100,9 +103,21 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <Link to="/account" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Button 
+              variant="ghost" 
+              onClick={() => openAuth('login')}
+              className="flex items-center gap-2"
+            >
               <User className="w-5 h-5" />
-            </Link>
+              <span className="hidden lg:inline">Iniciar sesión</span>
+            </Button>
+            <Button 
+              variant="default"
+              onClick={() => openAuth('register')}
+              className="hidden lg:flex"
+            >
+              Registrarse
+            </Button>
           </div>
           
           {/* Mobile menu button */}
@@ -185,6 +200,29 @@ const Navbar = () => {
             <SearchBar />
           </div>
           
+          {/* Auth buttons */}
+          <div className="flex flex-col space-y-2 mb-4">
+            <Button 
+              onClick={() => {
+                openAuth('login');
+                setIsMenuOpen(false);
+              }}
+              className="w-full"
+            >
+              Iniciar sesión
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                openAuth('register');
+                setIsMenuOpen(false);
+              }}
+              className="w-full"
+            >
+              Registrarse
+            </Button>
+          </div>
+          
           <h3 className="font-medium text-sm text-gray-500 uppercase tracking-wider">Categories</h3>
           <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-2">
             {categories.map((category, idx) => (
@@ -222,9 +260,6 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <Link to="/account" className="text-muted-foreground hover:text-foreground transition-colors">
-              <User className="w-5 h-5" />
-            </Link>
           </div>
         </div>
       )}
