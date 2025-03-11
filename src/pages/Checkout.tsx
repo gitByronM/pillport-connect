@@ -6,16 +6,8 @@ import { DollarSign, CreditCard, Smartphone, Edit, Truck, Clock, ChevronRight, S
 import { Link } from 'react-router-dom';
 import AddressEditModal from '@/components/checkout/AddressEditModal';
 import MobilePaymentDetails from '@/components/checkout/MobilePaymentDetails';
-import type { PaymentMethodType, MobilePaymentDetails as MobilePaymentDetailsType, ShippingAddress } from '@/types/checkout';
+import { PaymentMethodType, MobilePaymentDetails as MobilePaymentDetailsType, ShippingAddress } from '@/types/checkout';
 import { PaymentMethod } from '@/types/checkout';
-
-const PaymentMethod = {
-  CASH: 'cash',
-  POS: 'pos',
-  MOBILE: 'mobile'
-} as const;
-
-type PaymentMethodType = typeof PaymentMethod[keyof typeof PaymentMethod];
 
 const ShippingMethod = {
   STANDARD: 'standard',
