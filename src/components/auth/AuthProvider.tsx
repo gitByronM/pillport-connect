@@ -1,14 +1,18 @@
 
 import { createContext, useContext, ReactNode, useState } from 'react';
-import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import { AuthDialogType } from '@/types/auth';
 import AuthDialog from './AuthDialog';
 
 type AuthContextType = {
-  openAuth: (type?: AuthDialogType) => void;
-  closeAuth: () => void;
+  isAuthOpen: boolean;
+  authType: AuthDialogType;
+  hasEnteredIdentifier: boolean;
   isAuthenticated: boolean;
   user: any | null;
+  openAuth: (type?: AuthDialogType) => void;
+  closeAuth: () => void;
+  switchAuthType: (type: AuthDialogType) => void;
+  setHasEnteredIdentifier: (value: boolean) => void;
   logout: () => void;
 };
 
@@ -23,17 +27,28 @@ export const useAuthContext = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const {
-    isAuthOpen,
-    authType,
-    openAuth,
-    closeAuth,
-    switchAuthType
-  } = useAuthHook();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authType, setAuthType] = useState<AuthDialogType>('login');
+  const [hasEnteredIdentifier, setHasEnteredIdentifier] = useState(false);
 
   // Mock authentication state - in a real app, this would be connected to your backend
   const isAuthenticated = false;
   const user = null;
+
+  const openAuth = (type: AuthDialogType = 'login') => {
+    setAuthType(type);
+    setIsAuthOpen(true);
+    setHasEnteredIdentifier(false);
+  };
+
+  const closeAuth = () => {
+    setIsAuthOpen(false);
+  };
+
+  const switchAuthType = (type: AuthDialogType) => {
+    setAuthType(type);
+    setHasEnteredIdentifier(false);
+  };
 
   const logout = () => {
     // In a real app, you would call your backend to log out
@@ -41,7 +56,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ openAuth, closeAuth, isAuthenticated, user, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthOpen,
+        authType,
+        hasEnteredIdentifier,
+        isAuthenticated,
+        user,
+        openAuth,
+        closeAuth,
+        switchAuthType,
+        setHasEnteredIdentifier,
+        logout
+      }}
+    >
       {children}
       <AuthDialog 
         isOpen={isAuthOpen} 
