@@ -8,13 +8,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import MobileMenu from './navbar/MobileMenu';
 import DesktopNav from './navbar/DesktopNav';
-import { categories } from './navbar/categories';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [showCategoriesMenu, setShowCategoriesMenu] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   const { openCart, itemCount } = useCart();
@@ -29,7 +27,6 @@ const Navbar = () => {
   useEffect(() => {
     setIsMenuOpen(false);
     setIsSearchOpen(false);
-    setShowCategoriesMenu(false);
   }, [location]);
 
   return (
@@ -98,11 +95,7 @@ const Navbar = () => {
           </button>
         </div>
         
-        <DesktopNav 
-          showCategoriesMenu={showCategoriesMenu}
-          setShowCategoriesMenu={setShowCategoriesMenu}
-          categories={categories}
-        />
+        <DesktopNav />
       </div>
       
       {isHomePage && isSearchOpen && (
@@ -117,4 +110,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

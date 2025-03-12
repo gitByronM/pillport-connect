@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useUserContext } from '@/components/auth/UserProvider';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import AccountSidebar from '@/components/account/AccountSidebar';
 import ContactInfo from '@/components/account/ContactInfo';
 import Addresses from '@/components/account/Addresses';
@@ -15,7 +15,7 @@ export default function Account() {
   const [activeTab, setActiveTab] = useState<AccountTab>('contact-info');
 
   if (!isLoggedIn) {
-    return <Redirect to="/" />;
+    return <Navigate to="/" />;
   }
 
   return (

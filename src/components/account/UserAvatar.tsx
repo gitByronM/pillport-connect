@@ -1,7 +1,7 @@
 
 import { useUserContext } from '@/components/auth/UserProvider';
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   LogOut, 
@@ -22,20 +22,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function UserAvatar() {
   const { isLoggedIn, userProfile, logout } = useUserContext();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   if (!isLoggedIn) return null;
 
   const handleNavigate = (path: string) => {
-    history.push(path);
+    navigate(path);
     setOpen(false);
   };
 
   const handleLogout = () => {
     logout();
     setOpen(false);
-    history.push('/');
+    navigate('/');
   };
 
   return (

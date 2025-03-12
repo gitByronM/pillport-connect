@@ -8,13 +8,8 @@ import UserNavigation from "./UserNavigation";
 import { useCart } from "@/components/cart/CartProvider";
 
 export default function DesktopNav() {
-  const { toggleCart, cartItems } = useCart();
+  const { openCart, itemCount } = useCart();
   
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
   return (
     <div className="hidden lg:block">
       <div className="container mx-auto px-4 py-4">
@@ -41,13 +36,13 @@ export default function DesktopNav() {
             <Button
               variant="outline"
               size="icon"
-              onClick={toggleCart}
+              onClick={openCart}
               className="relative"
             >
               <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
+              {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItemCount}
+                  {itemCount}
                 </span>
               )}
             </Button>
