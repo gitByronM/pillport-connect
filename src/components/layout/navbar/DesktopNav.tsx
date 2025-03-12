@@ -1,56 +1,59 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import CategoriesMenu from './CategoriesMenu';
+import { Link } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import SearchBar from "@/components/ui/SearchBar";
+import CategoriesMenu from "./CategoriesMenu";
+import UserNavigation from "./UserNavigation";
+import { useCart } from "@/components/cart/CartProvider";
 
-interface DesktopNavProps {
-  showCategoriesMenu: boolean;
-  setShowCategoriesMenu: (value: boolean) => void;
-  categories: Array<{
-    name: string;
-    subcategories: string[];
-  }>;
-}
-
-const DesktopNav = ({ showCategoriesMenu, setShowCategoriesMenu, categories }: DesktopNavProps) => {
-  const location = useLocation();
-  const isActive = (path: string) => location.pathname === path ? 'active' : '';
+export default function DesktopNav() {
+  const { toggleCart, cartItems } = useCart();
+  
+  const cartItemCount = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   return (
-    <nav className="hidden md:flex items-center border-t border-b border-gray-100 py-2">
-      <div className="relative mr-6">
-        <button 
-          className="flex items-center text-foreground hover:text-pharma-600 font-medium transition-colors"
-          onMouseEnter={() => setShowCategoriesMenu(true)}
-          onClick={() => setShowCategoriesMenu(!showCategoriesMenu)}
-        >
-          All Categories
-          <svg 
-            className={`ml-1 w-4 h-4 transition-transform ${showCategoriesMenu ? 'rotate-180' : ''}`}
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        
-        <CategoriesMenu 
-          showMenu={showCategoriesMenu}
-          onMouseLeave={() => setShowCategoriesMenu(false)}
-          categories={categories}
-        />
+    <div className="hidden lg:block">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <Link to="/" className="text-2xl font-bold text-pharma-600">
+              <img
+                src="/lovable-uploads/90a10636-03a6-45ff-b6c5-6b9dd342bfd7.png"
+                alt="Farmatodo"
+                className="h-10"
+              />
+            </Link>
+
+            <CategoriesMenu />
+          </div>
+
+          <div className="flex-1 mx-8">
+            <SearchBar />
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <UserNavigation />
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleCart}
+              className="relative"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartItemCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      <Link to="/products" className={`nav-link ${isActive('/products')}`}>All Products</Link>
-      <Link to="/products/category/medicines" className="nav-link">Medicines</Link>
-      <Link to="/products/category/personal-care" className="nav-link">Personal Care</Link>
-      <Link to="/products/category/baby-care" className="nav-link">Baby Care</Link>
-      <Link to="/services" className={`nav-link ${isActive('/services')}`}>Services</Link>
-      <Link to="/offers" className="nav-link">Offers</Link>
-    </nav>
+    </div>
   );
-};
-
-export default DesktopNav;
-
+}

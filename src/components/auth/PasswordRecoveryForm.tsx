@@ -6,10 +6,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Smartphone, Mail, MessageSquare } from 'lucide-react';
-
-type PasswordRecoveryFormData = {
-  recoveryMethod: 'sms' | 'email' | 'whatsapp';
-};
+import { PasswordRecoveryFormData } from '@/types/auth';
 
 const recoverySchema = z.object({
   recoveryMethod: z.enum(['sms', 'email', 'whatsapp'], {
@@ -75,17 +72,25 @@ export default function PasswordRecoveryForm({
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <RadioGroup
-          defaultValue="sms"
+        <input
+          type="hidden"
+          {...register('recoveryMethod')}
           value={selectedMethod}
-          onValueChange={handleMethodSelection}
-          className="space-y-4"
-        >
+        />
+        
+        <div className="space-y-4">
           <div 
-            className={`flex items-center space-x-3 border rounded-md p-3 ${selectedMethod === 'sms' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
+            className={`flex items-center space-x-3 border rounded-md p-3 cursor-pointer ${selectedMethod === 'sms' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
             onClick={() => handleMethodSelection('sms')}
           >
-            <RadioGroupItem value="sms" id="sms" />
+            <input
+              type="radio"
+              id="sms"
+              name="recoveryMethodRadio"
+              checked={selectedMethod === 'sms'}
+              onChange={() => handleMethodSelection('sms')}
+              className="h-4 w-4 text-pharma-600 focus:ring-pharma-500"
+            />
             <Smartphone className="w-6 h-6 text-pharma-500" />
             <div className="flex flex-col">
               <Label htmlFor="sms" className="font-medium">Enviar código por SMS</Label>
@@ -94,10 +99,17 @@ export default function PasswordRecoveryForm({
           </div>
           
           <div 
-            className={`flex items-center space-x-3 border rounded-md p-3 ${selectedMethod === 'email' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
+            className={`flex items-center space-x-3 border rounded-md p-3 cursor-pointer ${selectedMethod === 'email' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
             onClick={() => handleMethodSelection('email')}
           >
-            <RadioGroupItem value="email" id="email" />
+            <input
+              type="radio"
+              id="email"
+              name="recoveryMethodRadio"
+              checked={selectedMethod === 'email'}
+              onChange={() => handleMethodSelection('email')}
+              className="h-4 w-4 text-pharma-600 focus:ring-pharma-500"
+            />
             <Mail className="w-6 h-6 text-pharma-500" />
             <div className="flex flex-col">
               <Label htmlFor="email" className="font-medium">Enviar código por correo electrónico</Label>
@@ -106,17 +118,24 @@ export default function PasswordRecoveryForm({
           </div>
           
           <div 
-            className={`flex items-center space-x-3 border rounded-md p-3 ${selectedMethod === 'whatsapp' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
+            className={`flex items-center space-x-3 border rounded-md p-3 cursor-pointer ${selectedMethod === 'whatsapp' ? 'border-pharma-500 bg-pharma-50' : 'border-gray-200'}`}
             onClick={() => handleMethodSelection('whatsapp')}
           >
-            <RadioGroupItem value="whatsapp" id="whatsapp" />
+            <input
+              type="radio"
+              id="whatsapp"
+              name="recoveryMethodRadio"
+              checked={selectedMethod === 'whatsapp'}
+              onChange={() => handleMethodSelection('whatsapp')}
+              className="h-4 w-4 text-pharma-600 focus:ring-pharma-500"
+            />
             <MessageSquare className="w-6 h-6 text-pharma-500" />
             <div className="flex flex-col">
               <Label htmlFor="whatsapp" className="font-medium">Enviar código por WhatsApp</Label>
               <span className="text-sm text-gray-500">{maskedPhone}</span>
             </div>
           </div>
-        </RadioGroup>
+        </div>
 
         {errors.recoveryMethod && (
           <p className="text-red-500 text-xs">{errors.recoveryMethod.message}</p>

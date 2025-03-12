@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -33,19 +33,31 @@ export default function LoginForm({
   setHasEnteredIdentifier
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordEntered, setPasswordEntered] = useState(false);
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isSubmitting },
     watch,
-    trigger
+    trigger,
+    getValues
   } = useForm<LoginFormData>({
     resolver: zodResolver(hasEnteredIdentifier ? passwordSchema : emailSchema),
     mode: 'onChange',
   });
 
   const identifier = watch('identifier');
+  const password = watch('password');
+
+  // Enable button when password is entered
+  useEffect(() => {
+    if (hasEnteredIdentifier && password) {
+      setPasswordEntered(true);
+    } else {
+      setPasswordEntered(false);
+    }
+  }, [hasEnteredIdentifier, password]);
 
   const validateIdentifier = async () => {
     const result = await trigger('identifier');
@@ -99,6 +111,11 @@ export default function LoginForm({
             className={`${errors.identifier ? 'border-red-500' : ''} ${hasEnteredIdentifier ? 'bg-gray-100' : ''}`}
             disabled={hasEnteredIdentifier}
             autoComplete="email"
+            onBlur={() => {
+              if (getValues('identifier')) {
+                validateIdentifier();
+              }
+            }}
           />
           {errors.identifier && (
             <p className="text-red-500 text-xs">{errors.identifier.message}</p>
@@ -117,7 +134,7 @@ export default function LoginForm({
             />
             <button
               type="button"
-              className="absolute right-3 top-3 text-gray-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -143,7 +160,7 @@ export default function LoginForm({
         <Button 
           type="submit" 
           className="w-full"
-          disabled={!identifier || isSubmitting}
+          disabled={!identifier || (hasEnteredIdentifier && !passwordEntered) || isSubmitting}
         >
           {isSubmitting 
             ? "Procesando..." 
