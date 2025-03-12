@@ -6,33 +6,34 @@ import SearchBar from "@/components/ui/SearchBar";
 import CategoriesMenu from "./CategoriesMenu";
 import UserNavigation from "./UserNavigation";
 import { useCart } from "@/components/cart/CartProvider";
+import { useLocation } from "react-router-dom";
 
 export default function DesktopNav() {
   const { openCart, itemCount } = useCart();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   
   return (
     <div className="hidden lg:block">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <Link to="/" className="text-2xl font-bold text-pharma-600">
-              <img
-                src="/lovable-uploads/90a10636-03a6-45ff-b6c5-6b9dd342bfd7.png"
-                alt="Farmatodo"
-                className="h-10"
-              />
-            </Link>
+          <Link to="/" className="text-2xl font-bold text-pharma-600">
+            <img
+              src="/lovable-uploads/90a10636-03a6-45ff-b6c5-6b9dd342bfd7.png"
+              alt="Farmatodo"
+              className="h-10"
+            />
+          </Link>
 
-            <CategoriesMenu />
-          </div>
-
-          <div className="flex-1 mx-8">
-            <SearchBar />
-          </div>
+          <CategoriesMenu />
+          
+          {!isHomePage && (
+            <div className="flex-1 mx-8">
+              <SearchBar />
+            </div>
+          )}
 
           <div className="flex items-center space-x-4">
-            <UserNavigation />
-            
             <Button
               variant="outline"
               size="icon"
@@ -46,6 +47,7 @@ export default function DesktopNav() {
                 </span>
               )}
             </Button>
+            <UserNavigation />
           </div>
         </div>
       </div>

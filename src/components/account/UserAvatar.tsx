@@ -57,13 +57,13 @@ export default function UserAvatar() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleNavigate('/account')}>
+        <DropdownMenuItem onClick={() => handleNavigate('/account?tab=contact-info')}>
           <User className="mr-2 h-4 w-4" />
           <span>Perfil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleNavigate('/account')}>
+        <DropdownMenuItem onClick={() => handleNavigate('/account?tab=addresses')}>
           <Settings className="mr-2 h-4 w-4" />
-          <span>Configuración</span>
+          <span>Direcciones</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleNavigate('/account?tab=purchase-history')}>
           <ShoppingBag className="mr-2 h-4 w-4" />
