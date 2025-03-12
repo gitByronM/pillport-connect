@@ -143,22 +143,12 @@ export default function LoginForm({
         <Button 
           type="submit" 
           className="w-full"
-          disabled={(hasEnteredIdentifier && !isValid) || isSubmitting}
+          disabled={!identifier || isSubmitting}
         >
           {isSubmitting 
             ? "Procesando..." 
-            : (hasEnteredIdentifier ? "Iniciar sesión" : "Iniciar sesión celular")}
+            : "Iniciar sesión"}
         </Button>
-
-        {!hasEnteredIdentifier && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full"
-          >
-            Iniciar sesión celular
-          </Button>
-        )}
 
         <div className="text-center">
           <p className="text-sm text-gray-600">

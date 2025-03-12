@@ -4,10 +4,10 @@ export interface RegisterFormData {
   surname: string;
   email: string;
   password: string;
-  confirmPassword: string;
   idType: string;
   documentNumber: string;
   phoneCountryCode: string;
+  phonePrefix: string;
   phoneNumber: string;
   gender: 'male' | 'female';
   acceptTerms: boolean;

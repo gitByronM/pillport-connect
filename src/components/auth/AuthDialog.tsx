@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
@@ -43,9 +43,20 @@ export default function AuthDialog({
     onClose();
   };
 
+  const getTitleText = () => {
+    switch(authType) {
+      case 'login': return 'Iniciar sesión';
+      case 'register': return 'Registro de usuario';
+      case 'recovery': return 'Recuperar contraseña';
+      default: return 'Autenticación';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto" hideCloseButton>
+      <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="sr-only">{getTitleText()}</DialogTitle>
+        
         <button
           onClick={onClose}
           className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"

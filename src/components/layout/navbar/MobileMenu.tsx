@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/ui/SearchBar';
 import { useCart } from '@/components/cart/CartProvider';
 import { useAuth } from '@/hooks/useAuth';
+import { categories } from './categories';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -89,4 +90,3 @@ const MobileMenu = ({ isOpen, setIsMenuOpen }: MobileMenuProps) => {
 };
 
 export default MobileMenu;
-

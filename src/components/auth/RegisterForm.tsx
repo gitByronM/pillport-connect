@@ -9,25 +9,36 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RegisterFormData } from '@/types/auth';
+
+// Modified RegisterFormData without confirmPassword
+type RegisterFormData = {
+  name: string;
+  surname: string;
+  email: string;
+  password: string;
+  idType: string;
+  documentNumber: string;
+  phoneCountryCode: string;
+  phonePrefix: string;
+  phoneNumber: string;
+  gender: 'male' | 'female';
+  acceptTerms: boolean;
+};
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
   surname: z.string().min(2, { message: 'El apellido debe tener al menos 2 caracteres' }),
   email: z.string().email({ message: 'Ingrese un correo electrónico válido' }),
   password: z.string().min(8, { message: 'La contraseña debe tener al menos 8 caracteres' }),
-  confirmPassword: z.string(),
   idType: z.string().min(1, { message: 'Seleccione un tipo de documento' }),
   documentNumber: z.string().min(1, { message: 'Ingrese un número de documento' }),
   phoneCountryCode: z.string().default('+58'),
-  phoneNumber: z.string().min(10, { message: 'Ingrese un número de teléfono válido' }),
+  phonePrefix: z.string().min(1, { message: 'Seleccione un prefijo' }),
+  phoneNumber: z.string().min(7, { message: 'Ingrese un número de teléfono válido' }),
   gender: z.enum(['male', 'female']),
   acceptTerms: z.literal(true, {
     errorMap: () => ({ message: 'Debe aceptar los términos y condiciones' })
   })
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
 });
 
 type RegisterFormProps = {
@@ -37,7 +48,6 @@ type RegisterFormProps = {
 
 export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const {
     register,
@@ -48,6 +58,7 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
     mode: 'onChange',
     defaultValues: {
       phoneCountryCode: '+58',
+      phonePrefix: '0412',
       gender: 'female',
       idType: 'CÉDULA DE IDENTIDAD',
     }
@@ -114,46 +125,24 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2 relative">
-            <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Contraseña"
-              {...register('password')}
-              className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-400"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-            {errors.password && (
-              <p className="text-red-500 text-xs">{errors.password.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2 relative">
-            <Input
-              id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirme su contraseña"
-              {...register('confirmPassword')}
-              className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-3 text-gray-400"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>
-            )}
-          </div>
+        <div className="space-y-2 relative">
+          <Input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Contraseña"
+            {...register('password')}
+            className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+          {errors.password && (
+            <p className="text-red-500 text-xs">{errors.password.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -197,13 +186,17 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
           </div>
           
           <div className="col-span-3">
-            <Input
-              id="phoneAreaCode"
-              placeholder="0412"
-              className="w-full"
-              disabled
-              value="0412"
-            />
+            <select
+              id="phonePrefix"
+              {...register('phonePrefix')}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="0412">0412</option>
+              <option value="0414">0414</option>
+              <option value="0416">0416</option>
+              <option value="0424">0424</option>
+              <option value="0426">0426</option>
+            </select>
           </div>
           
           <div className="col-span-6 space-y-2">
