@@ -67,6 +67,12 @@ export default function PurchaseHistory() {
     setSelectedPurchase(null);
   };
 
+  // Render the status icon component
+  const renderStatusIcon = (status: Purchase['status']) => {
+    const StatusIcon = getStatusDetails(status).icon;
+    return <StatusIcon className="mr-1 h-4 w-4" />;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -92,7 +98,7 @@ export default function PurchaseHistory() {
             <div className="flex items-center mb-4">
               <span className="text-gray-700 font-medium mr-2">Estado:</span>
               <span className={`${getStatusDetails(selectedPurchase.status).bgColor} ${getStatusDetails(selectedPurchase.status).color} px-3 py-1 rounded-full inline-flex items-center`}>
-                <getStatusDetails(selectedPurchase.status).icon className="mr-1 h-4 w-4" />
+                {renderStatusIcon(selectedPurchase.status)}
                 {getStatusDetails(selectedPurchase.status).label}
               </span>
             </div>
@@ -170,7 +176,7 @@ export default function PurchaseHistory() {
                 <div className="flex items-center justify-between md:justify-end gap-4">
                   <div>
                     <span className={`${getStatusDetails(purchase.status).bgColor} ${getStatusDetails(purchase.status).color} px-2 py-1 rounded-full text-xs inline-flex items-center`}>
-                      <getStatusDetails(purchase.status).icon className="mr-1 h-3 w-3" />
+                      {renderStatusIcon(purchase.status)}
                       {getStatusDetails(purchase.status).label}
                     </span>
                   </div>
