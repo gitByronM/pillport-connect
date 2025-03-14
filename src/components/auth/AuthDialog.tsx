@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "./LoginForm";
@@ -18,12 +18,20 @@ export default function AuthDialog({
   onClose,
   defaultType = 'login',
 }: AuthDialogProps) {
+  // Local state to track dialog type within this component
+  const [localIsOpen, setLocalIsOpen] = useState(isOpen);
+  
   const {
     authType,
     hasEnteredIdentifier,
     setHasEnteredIdentifier,
     switchAuthType,
   } = useAuth();
+  
+  // Sync local state with props
+  useEffect(() => {
+    setLocalIsOpen(isOpen);
+  }, [isOpen]);
   
   // Ensure we clean up when dialog closes
   useEffect(() => {
@@ -32,6 +40,14 @@ export default function AuthDialog({
       setHasEnteredIdentifier(false);
     }
   }, [isOpen, setHasEnteredIdentifier]);
+
+  // Handle dialog close via Radix UI
+  const handleOpenChange = (open: boolean) => {
+    setLocalIsOpen(open);
+    if (!open) {
+      onClose();
+    }
+  };
 
   const handleSwitchToLogin = () => {
     switchAuthType('login');
@@ -63,7 +79,7 @@ export default function AuthDialog({
 
   // Use the hideCloseButton prop to manage our own close button
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={localIsOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto" hideCloseButton>
         <DialogTitle className="sr-only">{getTitleText()}</DialogTitle>
         

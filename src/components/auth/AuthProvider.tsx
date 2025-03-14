@@ -1,5 +1,5 @@
 
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useCallback } from 'react';
 import { AuthDialogType } from '@/types/auth';
 import AuthDialog from './AuthDialog';
 
@@ -30,30 +30,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authType, setAuthType] = useState<AuthDialogType>('login');
   const [hasEnteredIdentifier, setHasEnteredIdentifier] = useState(false);
+  const [dialogKey, setDialogKey] = useState(0); // Add a key to force re-render
 
   // Mock authentication state - in a real app, this would be connected to your backend
   const isAuthenticated = false;
   const user = null;
 
-  const openAuth = (type: AuthDialogType = 'login') => {
-    setAuthType(type);
-    setIsAuthOpen(true);
-    setHasEnteredIdentifier(false);
-  };
-
-  const closeAuth = () => {
+  // Memoize functions to prevent recreating them on each render
+  const openAuth = useCallback((type: AuthDialogType = 'login') => {
+    // First ensure any existing dialog is closed
     setIsAuthOpen(false);
-  };
-
-  const switchAuthType = (type: AuthDialogType) => {
+    
+    // Update dialog type and reset identifier state
     setAuthType(type);
     setHasEnteredIdentifier(false);
-  };
+    
+    // Use setTimeout to ensure state updates before opening
+    setTimeout(() => {
+      setDialogKey(prev => prev + 1); // Generate a new key for the dialog
+      setIsAuthOpen(true);
+    }, 0);
+  }, []);
 
-  const logout = () => {
+  const closeAuth = useCallback(() => {
+    setIsAuthOpen(false);
+  }, []);
+
+  const switchAuthType = useCallback((type: AuthDialogType) => {
+    setAuthType(type);
+    setHasEnteredIdentifier(false);
+  }, []);
+
+  const logout = useCallback(() => {
     // In a real app, you would call your backend to log out
     console.log('User logged out');
-  };
+  }, []);
 
   return (
     <AuthContext.Provider 
@@ -71,7 +82,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       {children}
+      {/* Use key to force re-create dialog component when needed */}
       <AuthDialog 
+        key={dialogKey}
         isOpen={isAuthOpen} 
         onClose={closeAuth} 
         defaultType={authType} 
