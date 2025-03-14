@@ -12,9 +12,16 @@ export default function UserNavigation() {
   const { isLoggedIn, login } = useUserContext();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
+  // Fix for modal duplication bug - ensure dialog state is controlled here
   const handleOpenAuthDialog = (type: 'login' | 'register') => {
-    openAuth(type);
-    setIsAuthDialogOpen(true);
+    // First close any existing dialog to prevent duplication
+    setIsAuthDialogOpen(false);
+    
+    // Use setTimeout to ensure state is updated before opening new dialog
+    setTimeout(() => {
+      openAuth(type);
+      setIsAuthDialogOpen(true);
+    }, 10);
   };
 
   // For demo purposes - provides a quick way to "mock" login
@@ -53,10 +60,13 @@ export default function UserNavigation() {
             </Button>
           </div>
           
-          <AuthDialog 
-            isOpen={isAuthDialogOpen} 
-            onClose={() => setIsAuthDialogOpen(false)} 
-          />
+          {/* Only render one instance of the dialog */}
+          {isAuthDialogOpen && (
+            <AuthDialog 
+              isOpen={isAuthDialogOpen} 
+              onClose={() => setIsAuthDialogOpen(false)} 
+            />
+          )}
         </>
       )}
     </div>

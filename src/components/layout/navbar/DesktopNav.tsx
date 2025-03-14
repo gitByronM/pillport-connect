@@ -17,23 +17,30 @@ export default function DesktopNav() {
     <div className="hidden lg:block">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-pharma-600">
-            <img
-              src="/lovable-uploads/90a10636-03a6-45ff-b6c5-6b9dd342bfd7.png"
-              alt="Farmatodo"
-              className="h-10"
-            />
+          {/* Text-based Logo */}
+          <Link to="/" className="text-2xl font-bold text-pharma-600 flex items-center">
+            <span className="bg-gradient-to-r from-pharma-600 to-pharma-700 bg-clip-text text-transparent">
+              PharmaConnect
+            </span>
           </Link>
 
-          <CategoriesMenu />
+          {/* Categories Menu right beside the logo */}
+          <div className="ml-6">
+            <CategoriesMenu />
+          </div>
           
+          {/* Search Bar (only visible on non-homepage) */}
           {!isHomePage && (
             <div className="flex-1 mx-8">
               <SearchBar />
             </div>
           )}
 
+          {/* Right side items: Login/Register and Cart */}
           <div className="flex items-center space-x-4">
+            <UserNavigation />
+            
+            {/* Shopping Cart - moved to far right */}
             <Button
               variant="outline"
               size="icon"
@@ -47,7 +54,6 @@ export default function DesktopNav() {
                 </span>
               )}
             </Button>
-            <UserNavigation />
           </div>
         </div>
       </div>

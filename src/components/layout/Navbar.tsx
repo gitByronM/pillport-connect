@@ -30,12 +30,10 @@ const Navbar = () => {
       
       <div className="lg:hidden container px-4 mx-auto">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-pharma-700">
-            <img
-              src="/lovable-uploads/90a10636-03a6-45ff-b6c5-6b9dd342bfd7.png"
-              alt="Farmatodo"
-              className="h-10"
-            />
+          <Link to="/" className="text-2xl font-bold">
+            <span className="bg-gradient-to-r from-pharma-600 to-pharma-700 bg-clip-text text-transparent">
+              PharmaConnect
+            </span>
           </Link>
           
           <button 
