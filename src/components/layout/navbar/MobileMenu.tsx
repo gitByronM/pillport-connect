@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search, ShoppingCart, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/ui/SearchBar';
 import { useCart } from '@/components/cart/CartProvider';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserContext } from '@/components/auth/UserProvider';
 import { categories } from './categories';
 
 interface MobileMenuProps {
@@ -16,6 +17,7 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, setIsMenuOpen }: MobileMenuProps) => {
   const { openCart, itemCount } = useCart();
   const { openAuth } = useAuth();
+  const { isLoggedIn } = useUserContext();
 
   if (!isOpen) return null;
 
@@ -25,27 +27,39 @@ const MobileMenu = ({ isOpen, setIsMenuOpen }: MobileMenuProps) => {
         <SearchBar />
       </div>
       
-      <div className="flex flex-col space-y-2 mb-4">
-        <Button 
-          onClick={() => {
-            openAuth('login');
-            setIsMenuOpen(false);
-          }}
-          className="w-full"
-        >
-          Iniciar sesión
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => {
-            openAuth('register');
-            setIsMenuOpen(false);
-          }}
-          className="w-full"
-        >
-          Registrarse
-        </Button>
-      </div>
+      {isLoggedIn ? (
+        <Link to="/account" className="w-full" onClick={() => setIsMenuOpen(false)}>
+          <Button 
+            variant="outline"
+            className="w-full flex items-center gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Mi Cuenta
+          </Button>
+        </Link>
+      ) : (
+        <div className="flex flex-col space-y-2 mb-4">
+          <Button 
+            onClick={() => {
+              openAuth('login');
+              setIsMenuOpen(false);
+            }}
+            className="w-full"
+          >
+            Iniciar sesión
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              openAuth('register');
+              setIsMenuOpen(false);
+            }}
+            className="w-full"
+          >
+            Registrarse
+          </Button>
+        </div>
+      )}
       
       <h3 className="font-medium text-sm text-gray-500 uppercase tracking-wider">Categories</h3>
       <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-2">
@@ -54,6 +68,7 @@ const MobileMenu = ({ isOpen, setIsMenuOpen }: MobileMenuProps) => {
             key={idx}
             to={`/products/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
             className="text-lg font-medium text-foreground hover:text-pharma-600 transition-colors"
+            onClick={() => setIsMenuOpen(false)}
           >
             {category.name}
           </Link>
@@ -62,10 +77,10 @@ const MobileMenu = ({ isOpen, setIsMenuOpen }: MobileMenuProps) => {
       
       <div className="h-px bg-gray-200 my-2" />
       
-      <Link to="/" className="text-lg font-medium text-foreground">Home</Link>
-      <Link to="/products" className="text-lg font-medium text-foreground">All Products</Link>
-      <Link to="/services" className="text-lg font-medium text-foreground">Services</Link>
-      <Link to="/offers" className="text-lg font-medium text-foreground">Offers</Link>
+      <Link to="/" className="text-lg font-medium text-foreground" onClick={() => setIsMenuOpen(false)}>Home</Link>
+      <Link to="/products" className="text-lg font-medium text-foreground" onClick={() => setIsMenuOpen(false)}>All Products</Link>
+      <Link to="/services" className="text-lg font-medium text-foreground" onClick={() => setIsMenuOpen(false)}>Services</Link>
+      <Link to="/offers" className="text-lg font-medium text-foreground" onClick={() => setIsMenuOpen(false)}>Offers</Link>
       
       <div className="h-px bg-gray-200 my-2" />
       

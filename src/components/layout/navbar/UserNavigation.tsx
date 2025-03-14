@@ -2,9 +2,10 @@
 import { useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserContext } from '@/components/auth/UserProvider';
-import { User } from 'lucide-react';
+import { User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/account/UserAvatar';
+import { Link } from 'react-router-dom';
 
 export default function UserNavigation() {
   const { openAuth, closeAuth } = useAuth();
@@ -39,7 +40,15 @@ export default function UserNavigation() {
   return (
     <div className="flex items-center space-x-3">
       {isLoggedIn ? (
-        <UserAvatar />
+        <div className="flex items-center space-x-2">
+          <Link to="/account">
+            <Button variant="ghost" size="sm" className="flex items-center gap-1">
+              <Settings className="h-4 w-4" />
+              <span className="hidden md:inline">Mi Cuenta</span>
+            </Button>
+          </Link>
+          <UserAvatar />
+        </div>
       ) : (
         <>
           <div className="hidden md:flex space-x-2">
