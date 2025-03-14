@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserContext } from '@/components/auth/UserProvider';
 import { User } from 'lucide-react';
@@ -11,21 +11,35 @@ export default function UserNavigation() {
   const { openAuth } = useAuth();
   const { isLoggedIn, login } = useUserContext();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  
+  // Close any existing dialog when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsAuthDialogOpen(false);
+    };
+  }, []);
 
-  // Fix for modal duplication bug - ensure dialog state is controlled here
-  const handleOpenAuthDialog = (type: 'login' | 'register') => {
-    // First close any existing dialog to prevent duplication
+  // Fix for modal duplication bug
+  const handleOpenAuthDialog = (type: 'login' | 'register', e?: React.MouseEvent) => {
+    // Prevent default form submission if this is triggered from a form button
+    if (e) {
+      e.preventDefault();
+    }
+    
+    // First ensure any existing dialog is closed
     setIsAuthDialogOpen(false);
     
-    // Use setTimeout to ensure state is updated before opening new dialog
-    setTimeout(() => {
+    // Use requestAnimationFrame to ensure state has time to update
+    // before opening the new dialog
+    requestAnimationFrame(() => {
       openAuth(type);
       setIsAuthDialogOpen(true);
-    }, 10);
+    });
   };
 
   // For demo purposes - provides a quick way to "mock" login
-  const handleQuickLogin = () => {
+  const handleQuickLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
     login();
   };
 
@@ -36,13 +50,22 @@ export default function UserNavigation() {
       ) : (
         <>
           <div className="hidden md:flex space-x-2">
-            <Button variant="outline" onClick={() => handleOpenAuthDialog('login')}>
+            <Button 
+              variant="outline" 
+              onClick={(e) => handleOpenAuthDialog('login', e)}
+            >
               Iniciar sesión
             </Button>
-            <Button onClick={() => handleOpenAuthDialog('register')}>
+            <Button 
+              onClick={(e) => handleOpenAuthDialog('register', e)}
+            >
               Regístrate
             </Button>
-            <Button variant="secondary" onClick={handleQuickLogin} size="sm">
+            <Button 
+              variant="secondary" 
+              onClick={handleQuickLogin} 
+              size="sm"
+            >
               <User className="mr-1 h-4 w-4" />
               Demo Login
             </Button>
@@ -53,14 +76,14 @@ export default function UserNavigation() {
               variant="outline" 
               size="sm" 
               className="flex items-center" 
-              onClick={() => handleOpenAuthDialog('login')}
+              onClick={(e) => handleOpenAuthDialog('login', e)}
             >
               <User className="h-4 w-4 mr-2" />
               <span>Accede</span>
             </Button>
           </div>
           
-          {/* Only render one instance of the dialog */}
+          {/* Only render the dialog when isAuthDialogOpen is true */}
           {isAuthDialogOpen && (
             <AuthDialog 
               isOpen={isAuthDialogOpen} 

@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "./LoginForm";
@@ -23,6 +24,14 @@ export default function AuthDialog({
     setHasEnteredIdentifier,
     switchAuthType,
   } = useAuth();
+  
+  // Ensure we clean up when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset state when dialog is closed
+      setHasEnteredIdentifier(false);
+    }
+  }, [isOpen, setHasEnteredIdentifier]);
 
   const handleSwitchToLogin = () => {
     switchAuthType('login');
@@ -52,9 +61,10 @@ export default function AuthDialog({
     }
   };
 
+  // Use the hideCloseButton prop to manage our own close button
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto" hideCloseButton>
         <DialogTitle className="sr-only">{getTitleText()}</DialogTitle>
         
         <button

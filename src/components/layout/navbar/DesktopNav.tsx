@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/ui/SearchBar";
-import CategoriesMenu from "./CategoriesMenu";
 import UserNavigation from "./UserNavigation";
 import { useCart } from "@/components/cart/CartProvider";
 import { useLocation } from "react-router-dom";
@@ -23,11 +22,6 @@ export default function DesktopNav() {
               PharmaConnect
             </span>
           </Link>
-
-          {/* Categories Menu right beside the logo */}
-          <div className="ml-6">
-            <CategoriesMenu />
-          </div>
           
           {/* Search Bar (only visible on non-homepage) */}
           {!isHomePage && (
