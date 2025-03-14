@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { UserProvider } from "@/components/auth/UserProvider";
+import MainLayout from "./components/layout/MainLayout";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
@@ -28,16 +29,16 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/category/:id" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetails />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/account" element={<Account />} />
+                <Route path="/" element={<MainLayout><Index /></MainLayout>} />
+                <Route path="/products" element={<MainLayout><Products /></MainLayout>} />
+                <Route path="/products/category/:id" element={<MainLayout><Products /></MainLayout>} />
+                <Route path="/product/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
+                <Route path="/search" element={<MainLayout><Search /></MainLayout>} />
+                <Route path="/cart" element={<MainLayout><Cart /></MainLayout>} />
+                <Route path="/checkout" element={<MainLayout><Checkout /></MainLayout>} />
+                <Route path="/account" element={<MainLayout><Account /></MainLayout>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
               </Routes>
             </BrowserRouter>
           </CartProvider>

@@ -24,7 +24,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className={`transition-all duration-300 ${
-        isScrolled ? 'py-3 bg-white/80 backdrop-blur-md shadow-sm' : 'py-3 bg-white shadow-sm'
+        isScrolled ? 'py-3 bg-white/90 backdrop-blur-md shadow-sm' : 'py-3 bg-white shadow-sm'
       }`}>
         <DesktopNav />
         
@@ -48,7 +48,7 @@ const Navbar = () => {
       </div>
       
       {/* Categories Navigation Bar - Only visible on desktop */}
-      <div className="hidden lg:block bg-gray-50 border-b border-gray-200">
+      <div className="hidden lg:block bg-gray-50 border-b border-gray-200 shadow-sm">
         <CategoriesNavbar />
       </div>
       
