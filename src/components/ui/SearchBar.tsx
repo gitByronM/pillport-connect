@@ -25,8 +25,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClose, compact = false }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   
+  // Remove auto-focus when component mounts
   useEffect(() => {
-    if (inputRef.current && !compact) {
+    if (inputRef.current && !compact && false) { // Disable auto-focus
       inputRef.current.focus();
     }
   }, [compact]);
@@ -98,7 +99,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onClose, compact = false }) => {
         )}
         
         {isFocused && filteredSuggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-[60] animate-fade-in">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-[1000] animate-fade-in">
             <ul className="max-h-60 overflow-y-auto">
               {filteredSuggestions.map((item) => (
                 <li 
