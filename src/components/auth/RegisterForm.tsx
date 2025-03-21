@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 // Modified RegisterFormData without confirmPassword
 type RegisterFormData = {
@@ -48,6 +51,28 @@ type RegisterFormProps = {
 
 export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const { signUp, loading } = useAuth();
+  const [documentTypes, setDocumentTypes] = useState<{ id: string; name: string }[]>([]);
+  
+  // Fetch document types from Supabase
+  useEffect(() => {
+    const fetchDocumentTypes = async () => {
+      const { data, error } = await supabase
+        .from('document_types')
+        .select('id, name');
+      
+      if (error) {
+        console.error('Error fetching document types:', error);
+        return;
+      }
+      
+      if (data) {
+        setDocumentTypes(data);
+      }
+    };
+    
+    fetchDocumentTypes();
+  }, []);
   
   const {
     register,
@@ -67,13 +92,14 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
   const onSubmit = async (data: RegisterFormData) => {
     try {
       console.log('Form data submitted:', data);
-      // Here you would typically send the data to your backend API
+      await signUp(data);
       
       if (onRegisterSuccess) {
         onRegisterSuccess();
       }
     } catch (error) {
       console.error('Registration error:', error);
+      // Error is handled by the signUp function
     }
   };
 
@@ -151,9 +177,9 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
             {...register('idType')}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="CÉDULA DE IDENTIDAD">CÉDULA DE IDENTIDAD</option>
-            <option value="PASAPORTE">PASAPORTE</option>
-            <option value="DNI">DNI</option>
+            {documentTypes.map(type => (
+              <option key={type.id} value={type.name}>{type.name}</option>
+            ))}
           </select>
           {errors.idType && (
             <p className="text-red-500 text-xs">{errors.idType.message}</p>
@@ -261,9 +287,9 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={!isValid || isSubmitting}
+          disabled={!isValid || isSubmitting || loading}
         >
-          {isSubmitting ? "Procesando..." : "Registrarme"}
+          {isSubmitting || loading ? "Procesando..." : "Registrarme"}
         </Button>
 
         <div className="text-center mt-4">

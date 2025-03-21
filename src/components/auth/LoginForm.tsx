@@ -7,6 +7,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { LoginFormData } from '@/types/auth';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
 const emailSchema = z.object({
   identifier: z.string().min(1, { message: 'Ingrese un correo electrónico o número celular' }),
@@ -34,6 +36,8 @@ export default function LoginForm({
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordEntered, setPasswordEntered] = useState(false);
+  const { login, loading } = useAuth();
+  const { toast } = useToast();
   
   const {
     register,
@@ -41,7 +45,8 @@ export default function LoginForm({
     formState: { errors, isSubmitting },
     watch,
     trigger,
-    getValues
+    getValues,
+    setError
   } = useForm<LoginFormData>({
     resolver: zodResolver(hasEnteredIdentifier ? passwordSchema : emailSchema),
     mode: 'onChange',
@@ -62,10 +67,19 @@ export default function LoginForm({
   const validateIdentifier = async () => {
     const result = await trigger('identifier');
     if (result) {
-      // Here you would typically check if the email/phone exists in your system
-      console.log('Checking if identifier exists:', identifier);
+      // Check if identifier is a valid email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(identifier)) {
+        setError('identifier', {
+          type: 'manual',
+          message: 'Por favor ingrese un correo electrónico válido'
+        });
+        return;
+      }
       
-      // For demo purposes, we'll just move to the password step
+      // For demo purposes, we're just moving to password step without actually checking
+      // if the email exists in the database
+      console.log('Continuing with identifier:', identifier);
       setHasEnteredIdentifier(true);
     }
   };
@@ -78,13 +92,22 @@ export default function LoginForm({
 
     try {
       console.log('Login data submitted:', data);
-      // Here you would typically send the data to your backend API
+      if (!data.password) {
+        setError('password', {
+          type: 'manual',
+          message: 'Por favor ingrese su contraseña'
+        });
+        return;
+      }
+
+      await login(data.identifier, data.password);
       
       if (onLoginSuccess) {
         onLoginSuccess();
       }
     } catch (error) {
       console.error('Login error:', error);
+      // Error is already handled by the login function
     }
   };
 
@@ -160,9 +183,9 @@ export default function LoginForm({
         <Button 
           type="submit" 
           className="w-full"
-          disabled={!identifier || (hasEnteredIdentifier && !passwordEntered) || isSubmitting}
+          disabled={!identifier || (hasEnteredIdentifier && !passwordEntered) || isSubmitting || loading}
         >
-          {isSubmitting 
+          {isSubmitting || loading 
             ? "Procesando..." 
             : "Iniciar sesión"}
         </Button>

@@ -8,8 +8,8 @@ import UserAvatar from '@/components/account/UserAvatar';
 import { Link } from 'react-router-dom';
 
 export default function UserNavigation() {
-  const { openAuth, closeAuth } = useAuth();
-  const { isLoggedIn, login } = useUserContext();
+  const { openAuth, closeAuth, isAuthenticated } = useAuth();
+  const { login } = useUserContext();
   
   // Clean up any auth dialogs when component unmounts
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function UserNavigation() {
 
   return (
     <div className="flex items-center space-x-3">
-      {isLoggedIn ? (
+      {isAuthenticated ? (
         <div className="flex items-center space-x-2">
           <Link to="/account">
             <Button variant="ghost" size="sm" className="flex items-center gap-1">

@@ -23,3 +23,20 @@ export interface PasswordRecoveryFormData {
 }
 
 export type AuthDialogType = 'login' | 'register' | 'recovery';
+
+export interface DocumentType {
+  id: string;
+  name: string;
+}
+
+export interface Profile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  gender: 'male' | 'female';
+  document_number: string;
+  document_type_id: string;
+  created_at: string;
+  updated_at: string;
+}

@@ -1,19 +1,26 @@
 
-import { createContext, useContext, ReactNode, useState, useCallback } from 'react';
+import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
 import { AuthDialogType } from '@/types/auth';
 import AuthDialog from './AuthDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
+import { useToast } from '@/components/ui/use-toast';
 
 type AuthContextType = {
   isAuthOpen: boolean;
   authType: AuthDialogType;
   hasEnteredIdentifier: boolean;
   isAuthenticated: boolean;
-  user: any | null;
+  user: User | null;
+  session: Session | null;
   openAuth: (type?: AuthDialogType) => void;
   closeAuth: () => void;
   switchAuthType: (type: AuthDialogType) => void;
   setHasEnteredIdentifier: (value: boolean) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  signUp: (formData: any) => Promise<void>;
+  logout: () => Promise<void>;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,10 +38,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authType, setAuthType] = useState<AuthDialogType>('login');
   const [hasEnteredIdentifier, setHasEnteredIdentifier] = useState(false);
   const [dialogKey, setDialogKey] = useState(0); // Add a key to force re-render
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock authentication state - in a real app, this would be connected to your backend
-  const isAuthenticated = false;
-  const user = null;
+  // Check for session on initial load
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN') {
+          // Close auth dialog when signed in
+          setIsAuthOpen(false);
+          toast({
+            title: "Inicio de sesión exitoso",
+            description: "Bienvenido a Mi farmatodo",
+          });
+        } else if (event === 'SIGNED_OUT') {
+          toast({
+            title: "Sesión cerrada",
+            description: "Has cerrado sesión exitosamente",
+          });
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
 
   // Memoize functions to prevent recreating them on each render
   const openAuth = useCallback((type: AuthDialogType = 'login') => {
@@ -61,10 +103,84 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setHasEnteredIdentifier(false);
   }, []);
 
-  const logout = useCallback(() => {
-    // In a real app, you would call your backend to log out
-    console.log('User logged out');
-  }, []);
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error al iniciar sesión",
+        description: error.message || "Por favor intenta de nuevo",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const signUp = useCallback(async (formData: any) => {
+    try {
+      setLoading(true);
+      
+      // Format the phone with prefix
+      const phone = formData.phonePrefix 
+        ? `${formData.phonePrefix}-${formData.phoneNumber}` 
+        : formData.phoneNumber;
+      
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.name,
+            last_name: formData.surname,
+            phone: phone,
+            gender: formData.gender,
+            idType: formData.idType,
+            documentNumber: formData.documentNumber,
+          },
+        }
+      });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Registro exitoso",
+        description: "Tu cuenta ha sido creada exitosamente",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error al registrar",
+        description: error.message || "Por favor intenta de nuevo",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const logout = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error al cerrar sesión",
+        description: error.message || "Por favor intenta de nuevo",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   return (
     <AuthContext.Provider 
@@ -72,13 +188,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthOpen,
         authType,
         hasEnteredIdentifier,
-        isAuthenticated,
+        isAuthenticated: !!user,
         user,
+        session,
         openAuth,
         closeAuth,
         switchAuthType,
         setHasEnteredIdentifier,
-        logout
+        login,
+        signUp,
+        logout,
+        loading
       }}
     >
       {children}

@@ -19,23 +19,53 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function UserAvatar() {
-  const { isLoggedIn, userProfile, logout } = useUserContext();
+  const { userProfile } = useUserContext();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  if (!isLoggedIn) return null;
+  if (!user) return null;
 
   const handleNavigate = (path: string) => {
     navigate(path);
     setOpen(false);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setOpen(false);
     navigate('/');
+  };
+
+  // Get initials from user email if no profile
+  const getInitials = () => {
+    if (userProfile) {
+      return `${userProfile.name.charAt(0)}${userProfile.surname.charAt(0)}`;
+    }
+    
+    if (user.email) {
+      const parts = user.email.split('@');
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    
+    return 'U';
+  };
+
+  // Get display name
+  const getDisplayName = () => {
+    if (userProfile) {
+      return `Hola, ${userProfile.name}`;
+    }
+    
+    if (user.email) {
+      const parts = user.email.split('@');
+      return `Hola, ${parts[0]}`;
+    }
+    
+    return 'Mi cuenta';
   };
 
   return (
@@ -43,13 +73,13 @@ export default function UserAvatar() {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center space-x-1 focus:outline-none">
           <Avatar className="h-8 w-8 border-2 border-pharma-100">
-            <AvatarImage src={userProfile?.avatarUrl} alt={userProfile?.name} />
+            <AvatarImage src={userProfile?.avatarUrl} alt={userProfile?.name || user.email} />
             <AvatarFallback className="bg-pharma-100 text-pharma-600">
-              {userProfile?.name.charAt(0)}{userProfile?.surname.charAt(0)}
+              {getInitials()}
             </AvatarFallback>
           </Avatar>
           <span className="hidden md:inline text-sm font-medium">
-            {userProfile ? `Hola, ${userProfile.name}` : 'Mi cuenta'}
+            {getDisplayName()}
           </span>
           <ChevronDown className="h-4 w-4 text-gray-500" />
         </button>
