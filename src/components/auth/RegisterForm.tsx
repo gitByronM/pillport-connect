@@ -8,12 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 
-// Modified RegisterFormData without confirmPassword
+// Modified RegisterFormData without acceptTerms
 type RegisterFormData = {
   name: string;
   surname: string;
@@ -25,7 +24,6 @@ type RegisterFormData = {
   phonePrefix: string;
   phoneNumber: string;
   gender: 'male' | 'female';
-  acceptTerms: boolean;
 };
 
 const registerSchema = z.object({
@@ -38,10 +36,7 @@ const registerSchema = z.object({
   phoneCountryCode: z.string().default('+58'),
   phonePrefix: z.string().min(1, { message: 'Seleccione un prefijo' }),
   phoneNumber: z.string().min(7, { message: 'Ingrese un número de teléfono válido' }),
-  gender: z.enum(['male', 'female']),
-  acceptTerms: z.literal(true, {
-    errorMap: () => ({ message: 'Debe aceptar los términos y condiciones' })
-  })
+  gender: z.enum(['male', 'female'])
 });
 
 type RegisterFormProps = {
@@ -80,6 +75,8 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
     handleSubmit,
     formState: { errors, isValid, isSubmitting, isDirty },
     watch,
+    setValue,
+    control
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: 'onChange',
@@ -104,13 +101,17 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
       watchedValues.password?.length >= 8 &&
       watchedValues.idType?.length > 0 &&
       watchedValues.documentNumber?.length > 0 &&
-      watchedValues.phoneNumber?.length >= 7 &&
-      watchedValues.acceptTerms === true;
+      watchedValues.phoneNumber?.length >= 7;
     
     setFormValid(allFieldsFilled && Object.keys(errors).length === 0);
     
     console.log('Form validity:', allFieldsFilled, 'Errors:', Object.keys(errors).length);
   }, [watchedValues, errors]);
+
+  // Handle gender selection
+  const handleGenderChange = (value: string) => {
+    setValue('gender', value as 'male' | 'female', { shouldValidate: true });
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -262,49 +263,24 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
         </div>
 
         <div className="space-y-2">
-          <RadioGroup defaultValue="female" {...register('gender')}>
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="female" id="female" />
-                <Label htmlFor="female">Mujer</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="male" id="male" />
-                <Label htmlFor="male">Hombre</Label>
-              </div>
+          <Label htmlFor="gender">Género</Label>
+          <RadioGroup 
+            defaultValue="female" 
+            onValueChange={handleGenderChange}
+            className="flex items-center space-x-8"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="female" id="female" />
+              <Label htmlFor="female">Mujer</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="male" id="male" />
+              <Label htmlFor="male">Hombre</Label>
             </div>
           </RadioGroup>
-        </div>
-
-        <div className="flex items-start space-x-2">
-          <Checkbox 
-            id="acceptTerms" 
-            {...register('acceptTerms')} 
-            className={errors.acceptTerms ? 'border-red-500' : ''}
-          />
-          <div className="grid gap-1.5 leading-none">
-            <label
-              htmlFor="acceptTerms"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left"
-            >
-              Acepto y autorizo{" "}
-              <a href="#" className="text-pharma-600 hover:underline">
-                términos y condiciones
-              </a>{" "}
-              las{" "}
-              <a href="#" className="text-pharma-600 hover:underline">
-                políticas de privacidad
-              </a>{" "}
-              y{" "}
-              <a href="#" className="text-pharma-600 hover:underline">
-                política de tratamiento de datos personales
-              </a>{" "}
-              de Farmatodo.
-            </label>
-            {errors.acceptTerms && (
-              <p className="text-red-500 text-xs">{errors.acceptTerms.message}</p>
-            )}
-          </div>
+          {errors.gender && (
+            <p className="text-red-500 text-xs">{errors.gender.message}</p>
+          )}
         </div>
 
         <Button 

@@ -10,7 +10,6 @@ export interface RegisterFormData {
   phonePrefix: string;
   phoneNumber: string;
   gender: 'male' | 'female';
-  acceptTerms: boolean;
 }
 
 export interface LoginFormData {
