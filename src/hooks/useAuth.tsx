@@ -2,5 +2,6 @@
 import { useAuthContext } from '@/components/auth/AuthProvider';
 
 export function useAuth() {
-  return useAuthContext();
+  const auth = useAuthContext();
+  return auth;
 }

@@ -16,36 +16,42 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
+import React from 'react';
 
+// Create a new QueryClient instance outside of the component
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <UserProvider>
-          <CartProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<MainLayout><Index /></MainLayout>} />
-                <Route path="/products" element={<MainLayout><Products /></MainLayout>} />
-                <Route path="/products/category/:id" element={<MainLayout><Products /></MainLayout>} />
-                <Route path="/product/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
-                <Route path="/search" element={<MainLayout><Search /></MainLayout>} />
-                <Route path="/cart" element={<MainLayout><Cart /></MainLayout>} />
-                <Route path="/checkout" element={<MainLayout><Checkout /></MainLayout>} />
-                <Route path="/account" element={<MainLayout><Account /></MainLayout>} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
-              </Routes>
-            </BrowserRouter>
-          </CartProvider>
-        </UserProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <UserProvider>
+              <CartProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<MainLayout><Index /></MainLayout>} />
+                    <Route path="/products" element={<MainLayout><Products /></MainLayout>} />
+                    <Route path="/products/category/:id" element={<MainLayout><Products /></MainLayout>} />
+                    <Route path="/product/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
+                    <Route path="/search" element={<MainLayout><Search /></MainLayout>} />
+                    <Route path="/cart" element={<MainLayout><Cart /></MainLayout>} />
+                    <Route path="/checkout" element={<MainLayout><Checkout /></MainLayout>} />
+                    <Route path="/account" element={<MainLayout><Account /></MainLayout>} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+                  </Routes>
+                </BrowserRouter>
+              </CartProvider>
+            </UserProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
