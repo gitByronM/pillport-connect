@@ -5,11 +5,12 @@ import { useUserContext } from '@/components/auth/UserProvider';
 import { User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/account/UserAvatar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function UserNavigation() {
   const { openAuth, closeAuth, isAuthenticated } = useAuth();
   const { login } = useUserContext();
+  const navigate = useNavigate();
   
   // Clean up any auth dialogs when component unmounts
   useEffect(() => {
@@ -37,16 +38,25 @@ export default function UserNavigation() {
     login();
   }, [login]);
 
+  // Handle account navigation
+  const handleAccountNavigation = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/account');
+  }, [navigate]);
+
   return (
     <div className="flex items-center space-x-3">
       {isAuthenticated ? (
         <div className="flex items-center space-x-2">
-          <Link to="/account">
-            <Button variant="ghost" size="sm" className="flex items-center gap-1">
-              <Settings className="h-4 w-4" />
-              <span className="hidden md:inline">Mi Cuenta</span>
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={handleAccountNavigation}
+          >
+            <Settings className="h-4 w-4" />
+            <span className="hidden md:inline">Mi Cuenta</span>
+          </Button>
           <UserAvatar />
         </div>
       ) : (

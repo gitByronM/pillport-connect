@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUserContext } from '@/components/auth/UserProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/components/account/AccountSidebar';
 import ContactInfo from '@/components/account/ContactInfo';
@@ -12,6 +13,7 @@ type AccountTab = 'contact-info' | 'addresses' | 'purchase-history' | 'favorites
 
 export default function Account() {
   const { isLoggedIn } = useUserContext();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AccountTab>('contact-info');
@@ -30,7 +32,8 @@ export default function Account() {
     navigate(`/account?tab=${tab}`);
   };
 
-  if (!isLoggedIn) {
+  // Check if user is authenticated using both auth systems
+  if (!isLoggedIn && !isAuthenticated) {
     return <Navigate to="/" />;
   }
 
