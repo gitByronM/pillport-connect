@@ -53,6 +53,7 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
   const [showPassword, setShowPassword] = useState(false);
   const { signUp, loading } = useAuth();
   const [documentTypes, setDocumentTypes] = useState<{ id: string; name: string }[]>([]);
+  const [formValid, setFormValid] = useState(false);
   
   // Fetch document types from Supabase
   useEffect(() => {
@@ -77,7 +78,8 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid, isSubmitting, isDirty },
+    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: 'onChange',
@@ -88,6 +90,27 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
       idType: 'CÉDULA DE IDENTIDAD',
     }
   });
+
+  // Watch form values to manually validate
+  const watchedValues = watch();
+  
+  // Update form validity whenever watched values change
+  useEffect(() => {
+    // Check if all required fields are filled and valid
+    const allFieldsFilled = 
+      watchedValues.name?.length >= 2 &&
+      watchedValues.surname?.length >= 2 &&
+      watchedValues.email?.length > 0 &&
+      watchedValues.password?.length >= 8 &&
+      watchedValues.idType?.length > 0 &&
+      watchedValues.documentNumber?.length > 0 &&
+      watchedValues.phoneNumber?.length >= 7 &&
+      watchedValues.acceptTerms === true;
+    
+    setFormValid(allFieldsFilled && Object.keys(errors).length === 0);
+    
+    console.log('Form validity:', allFieldsFilled, 'Errors:', Object.keys(errors).length);
+  }, [watchedValues, errors]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -287,7 +310,7 @@ export default function RegisterForm({ onSwitchToLogin, onRegisterSuccess }: Reg
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={!isValid || isSubmitting || loading}
+          disabled={loading || isSubmitting || !formValid}
         >
           {isSubmitting || loading ? "Procesando..." : "Registrarme"}
         </Button>
