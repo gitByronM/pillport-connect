@@ -35,6 +35,7 @@ export type Database = {
           created_at: string
           document_number: string | null
           document_type_id: string | null
+          email: string | null
           first_name: string | null
           gender: string | null
           id: string
@@ -46,6 +47,7 @@ export type Database = {
           created_at?: string
           document_number?: string | null
           document_type_id?: string | null
+          email?: string | null
           first_name?: string | null
           gender?: string | null
           id: string
@@ -57,6 +59,7 @@ export type Database = {
           created_at?: string
           document_number?: string | null
           document_type_id?: string | null
+          email?: string | null
           first_name?: string | null
           gender?: string | null
           id?: string

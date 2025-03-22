@@ -36,33 +36,72 @@ export function UserProvider({ children }: { children: ReactNode }) {
         
         if (event === 'SIGNED_IN' && session?.user) {
           try {
+            // Clear any previous data
+            localStorage.removeItem('ft_user_profile');
+            localStorage.removeItem('ft_addresses');
+            localStorage.removeItem('ft_purchases');
+            localStorage.removeItem('ft_favorites');
+            
             // If a user signs in through Supabase, also log them in to the user context
-            const userData = session.user.user_metadata;
-            if (userData) {
-              // Format user metadata from Supabase to match our UserProfile structure
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (profileError) {
+              console.error('Error fetching profile:', profileError);
+            }
+            
+            if (profileData) {
+              // Format profile data from Supabase to match our UserProfile structure
               const userProfile: UserProfile = {
                 id: session.user.id,
-                name: userData.first_name || '',
-                surname: userData.last_name || '',
-                email: session.user.email || '',
+                name: profileData.first_name || '',
+                surname: profileData.last_name || '',
+                email: profileData.email || session.user.email || '',
                 phoneCountryCode: '+58',
-                phonePrefix: userData.phone?.split('-')[0] || '0412',
-                phoneNumber: userData.phone?.split('-')[1] || '',
-                idType: userData.idType || 'CÉDULA DE IDENTIDAD',
-                documentNumber: userData.documentNumber || '',
-                gender: userData.gender as 'male' | 'female',
+                phonePrefix: profileData.phone?.split('-')[0] || '0412',
+                phoneNumber: profileData.phone?.split('-')[1] || '',
+                idType: profileData.document_type_id ? 'CÉDULA DE IDENTIDAD' : 'CÉDULA DE IDENTIDAD',
+                documentNumber: profileData.document_number || '',
+                gender: profileData.gender as 'male' | 'female' || 'male',
                 avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
               };
               
-              // Clear any previous mock data and use the actual user data
-              localStorage.removeItem('ft_user_profile');
-              
               userState.login();
               userState.updateUserProfile(userProfile);
+              
               toast({
                 title: "Sesión iniciada",
                 description: `Bienvenido ${userProfile.name}`,
               });
+            } else {
+              // Use metadata if profile not found
+              const userData = session.user.user_metadata;
+              if (userData) {
+                const userProfile: UserProfile = {
+                  id: session.user.id,
+                  name: userData.first_name || '',
+                  surname: userData.last_name || '',
+                  email: session.user.email || '',
+                  phoneCountryCode: '+58',
+                  phonePrefix: userData.phone?.split('-')[0] || '0412',
+                  phoneNumber: userData.phone?.split('-')[1] || '',
+                  idType: userData.idType || 'CÉDULA DE IDENTIDAD',
+                  documentNumber: userData.documentNumber || '',
+                  gender: userData.gender as 'male' | 'female' || 'male',
+                  avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
+                };
+                
+                userState.login();
+                userState.updateUserProfile(userProfile);
+                
+                toast({
+                  title: "Sesión iniciada",
+                  description: `Bienvenido ${userProfile.name}`,
+                });
+              }
             }
           } catch (error) {
             console.error('Error syncing user data:', error);
@@ -70,13 +109,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           // If a user signs out through Supabase, also log them out from the user context
           userState.logout();
-          
-          // Clear local storage to prevent mock data from being loaded
-          localStorage.removeItem('ft_is_logged_in');
-          localStorage.removeItem('ft_user_profile');
-          localStorage.removeItem('ft_addresses');
-          localStorage.removeItem('ft_purchases');
-          localStorage.removeItem('ft_favorites');
           
           toast({
             title: "Sesión cerrada",
@@ -102,26 +134,66 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session?.user && !userState.userProfile) {
-        const userData = data.session.user.user_metadata;
-        if (userData) {
-          // Clear any previous mock data
-          localStorage.removeItem('ft_user_profile');
+        // Clear any previous data
+        localStorage.removeItem('ft_user_profile');
+        localStorage.removeItem('ft_addresses');
+        localStorage.removeItem('ft_purchases');
+        localStorage.removeItem('ft_favorites');
+        
+        try {
+          // Fetch profile data from Supabase
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .single();
+            
+          if (profileError && profileError.code !== 'PGRST116') {
+            console.error('Error fetching profile:', profileError);
+          }
           
-          const userProfile: UserProfile = {
-            id: data.session.user.id,
-            name: userData.first_name || '',
-            surname: userData.last_name || '',
-            email: data.session.user.email || '',
-            phoneCountryCode: '+58',
-            phonePrefix: userData.phone?.split('-')[0] || '0412',
-            phoneNumber: userData.phone?.split('-')[1] || '',
-            idType: userData.idType || 'CÉDULA DE IDENTIDAD',
-            documentNumber: userData.documentNumber || '',
-            gender: userData.gender as 'male' | 'female',
-            avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
-          };
-          userState.login();
-          userState.updateUserProfile(userProfile);
+          if (profileData) {
+            // Format profile data
+            const userProfile: UserProfile = {
+              id: data.session.user.id,
+              name: profileData.first_name || '',
+              surname: profileData.last_name || '',
+              email: profileData.email || data.session.user.email || '',
+              phoneCountryCode: '+58',
+              phonePrefix: profileData.phone?.split('-')[0] || '0412',
+              phoneNumber: profileData.phone?.split('-')[1] || '',
+              idType: profileData.document_type_id ? 'CÉDULA DE IDENTIDAD' : 'CÉDULA DE IDENTIDAD',
+              documentNumber: profileData.document_number || '',
+              gender: profileData.gender as 'male' | 'female' || 'male',
+              avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
+            };
+            
+            userState.login();
+            userState.updateUserProfile(userProfile);
+          } else {
+            // Fallback to metadata if no profile
+            const userData = data.session.user.user_metadata;
+            if (userData) {
+              const userProfile: UserProfile = {
+                id: data.session.user.id,
+                name: userData.first_name || '',
+                surname: userData.last_name || '',
+                email: data.session.user.email || '',
+                phoneCountryCode: '+58',
+                phonePrefix: userData.phone?.split('-')[0] || '0412',
+                phoneNumber: userData.phone?.split('-')[1] || '',
+                idType: userData.idType || 'CÉDULA DE IDENTIDAD',
+                documentNumber: userData.documentNumber || '',
+                gender: userData.gender as 'male' | 'female' || 'male',
+                avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
+              };
+              
+              userState.login();
+              userState.updateUserProfile(userProfile);
+            }
+          }
+        } catch (error) {
+          console.error('Error syncing user data:', error);
         }
       }
       setIsInitialized(true);

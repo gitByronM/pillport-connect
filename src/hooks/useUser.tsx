@@ -1,115 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { UserProfile, Address, Purchase, FavoriteItem } from '@/types/user';
-
-// Mock data
-const mockUserProfile: UserProfile = {
-  id: '1',
-  name: 'Byron',
-  surname: 'Miranda',
-  email: 'byronmiranda0401@gmail.com',
-  phoneCountryCode: '+58',
-  phonePrefix: '0412',
-  phoneNumber: '5002930',
-  idType: 'CÉDULA DE IDENTIDAD',
-  documentNumber: '29685540',
-  gender: 'male',
-  avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
-};
-
-const mockAddresses: Address[] = [
-  {
-    id: '1',
-    name: 'Casa',
-    street: 'Av. Principal, Res. Las Mercedes',
-    city: 'Caracas',
-    state: 'Distrito Capital',
-    zipCode: '1080',
-    isDefault: true
-  },
-  {
-    id: '2',
-    name: 'Trabajo',
-    street: 'Calle El Recreo, Edificio Delta',
-    city: 'Caracas',
-    state: 'Distrito Capital',
-    zipCode: '1050',
-    isDefault: false
-  }
-];
-
-const mockPurchases: Purchase[] = [
-  {
-    id: '1',
-    date: '2023-11-15',
-    total: 45.99,
-    status: 'delivered',
-    orderNumber: 'FT-2023110001',
-    items: [
-      {
-        id: '1-1',
-        name: 'Acetaminofén 500mg',
-        price: 15.99,
-        quantity: 2,
-        imageUrl: '/placeholder.svg'
-      },
-      {
-        id: '1-2',
-        name: 'Vitamina C 1000mg',
-        price: 14.01,
-        quantity: 1,
-        imageUrl: '/placeholder.svg'
-      }
-    ]
-  },
-  {
-    id: '2',
-    date: '2023-10-20',
-    total: 32.50,
-    status: 'completed',
-    orderNumber: 'FT-2023100022',
-    items: [
-      {
-        id: '2-1',
-        name: 'Crema Hidratante',
-        price: 22.50,
-        quantity: 1,
-        imageUrl: '/placeholder.svg'
-      },
-      {
-        id: '2-2',
-        name: 'Protector Solar SPF 50',
-        price: 10.00,
-        quantity: 1,
-        imageUrl: '/placeholder.svg'
-      }
-    ]
-  }
-];
-
-const mockFavorites: FavoriteItem[] = [
-  {
-    id: '1',
-    name: 'Crema Hidratante Eucerin',
-    price: 25.99,
-    imageUrl: '/placeholder.svg',
-    inStock: true
-  },
-  {
-    id: '2',
-    name: 'Vitamina D3 2000UI',
-    price: 12.50,
-    imageUrl: '/placeholder.svg',
-    inStock: true
-  },
-  {
-    id: '3',
-    name: 'Protector Solar Neutrogena',
-    price: 18.75,
-    imageUrl: '/placeholder.svg',
-    inStock: false
-  }
-];
+import { supabase } from '@/integrations/supabase/client';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -127,7 +19,7 @@ export function useUser() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
-  // Initialize state from localStorage
+  // Initialize state from localStorage only if logged in and no active session
   useEffect(() => {
     const storedIsLoggedIn = localStorage.getItem(STORAGE_KEYS.isLoggedIn) === 'true';
     setIsLoggedIn(storedIsLoggedIn);
@@ -142,33 +34,27 @@ export function useUser() {
       // Set user profile
       if (storedUserProfile) {
         setUserProfile(JSON.parse(storedUserProfile));
-      } else {
-        setUserProfile(mockUserProfile);
-        localStorage.setItem(STORAGE_KEYS.userProfile, JSON.stringify(mockUserProfile));
       }
 
       // Set addresses
       if (storedAddresses) {
         setAddresses(JSON.parse(storedAddresses));
       } else {
-        setAddresses(mockAddresses);
-        localStorage.setItem(STORAGE_KEYS.addresses, JSON.stringify(mockAddresses));
+        setAddresses([]);
       }
 
       // Set purchases
       if (storedPurchases) {
         setPurchases(JSON.parse(storedPurchases));
       } else {
-        setPurchases(mockPurchases);
-        localStorage.setItem(STORAGE_KEYS.purchases, JSON.stringify(mockPurchases));
+        setPurchases([]);
       }
 
       // Set favorites
       if (storedFavorites) {
         setFavorites(JSON.parse(storedFavorites));
       } else {
-        setFavorites(mockFavorites);
-        localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(mockFavorites));
+        setFavorites([]);
       }
     }
   }, []);
@@ -190,10 +76,6 @@ export function useUser() {
   // Login function
   const login = () => {
     setIsLoggedIn(true);
-    setUserProfile(mockUserProfile);
-    setAddresses(mockAddresses);
-    setPurchases(mockPurchases);
-    setFavorites(mockFavorites);
   };
 
   // Logout function
@@ -203,6 +85,13 @@ export function useUser() {
     setAddresses([]);
     setPurchases([]);
     setFavorites([]);
+    
+    // Clear local storage to prevent mock data from being loaded
+    localStorage.removeItem(STORAGE_KEYS.isLoggedIn);
+    localStorage.removeItem(STORAGE_KEYS.userProfile);
+    localStorage.removeItem(STORAGE_KEYS.addresses);
+    localStorage.removeItem(STORAGE_KEYS.purchases);
+    localStorage.removeItem(STORAGE_KEYS.favorites);
   };
 
   // Update user profile
@@ -210,6 +99,8 @@ export function useUser() {
     if (userProfile) {
       const newProfile = { ...userProfile, ...updatedProfile };
       setUserProfile(newProfile);
+    } else {
+      setUserProfile(updatedProfile as UserProfile);
     }
   };
 

@@ -10,6 +10,7 @@ import { Smartphone, Mail, MessageSquare, LoaderCircle } from 'lucide-react';
 import { PasswordRecoveryFormData } from '@/types/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
 
 const recoverySchema = z.object({
   recoveryMethod: z.enum(['sms', 'email', 'whatsapp'], {
@@ -30,6 +31,9 @@ export default function PasswordRecoveryForm({
   const { resetPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recoveryStep, setRecoveryStep] = useState<'method' | 'email'>('method');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   const {
     register,
@@ -46,11 +50,71 @@ export default function PasswordRecoveryForm({
     }
   });
 
+  // Fetch user email and phone on component mount
+  useState(() => {
+    const fetchUserInfo = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session?.user) {
+          const email = data.session.user.email || '';
+          setUserEmail(email);
+          setValue('email', email);
+          
+          // Get phone from user metadata or profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('phone')
+            .eq('id', data.session.user.id)
+            .single();
+            
+          if (profileData && profileData.phone) {
+            setUserPhone(profileData.phone);
+          } else if (data.session.user.user_metadata?.phone) {
+            setUserPhone(data.session.user.user_metadata.phone);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserInfo();
+  }, [setValue]);
+
   const selectedMethod = watch('recoveryMethod');
 
-  // Mock user data - in a real app, this would come from your backend
-  const maskedPhone = '58041******2930';
-  const maskedEmail = 'byronmira******@gmail.com';
+  // Generate masked versions of the user's contact info for privacy
+  const getMaskedEmail = () => {
+    if (!userEmail) return 'correo@ejemplo.com';
+    const [username, domain] = userEmail.split('@');
+    if (!username || !domain) return 'correo@ejemplo.com';
+    
+    const maskedUsername = username.substring(0, Math.min(3, username.length)) + 
+                          '******' + 
+                          (username.length > 6 ? username.substring(username.length - 1) : '');
+                          
+    return `${maskedUsername}@${domain}`;
+  };
+  
+  const getMaskedPhone = () => {
+    if (!userPhone) return '+58041******2930';
+    
+    const parts = userPhone.split('-');
+    const prefix = parts[0] || '0412';
+    const number = parts[1] || '';
+    
+    if (number.length <= 4) return `${prefix}-****`;
+    
+    const masked = number.substring(0, 2) + 
+                  '*'.repeat(Math.max(0, number.length - 4)) + 
+                  number.substring(number.length - 2);
+                  
+    return `${prefix}-${masked}`;
+  };
 
   const handleMethodSelection = (value: 'sms' | 'email' | 'whatsapp') => {
     setValue('recoveryMethod', value, { shouldValidate: true });
@@ -62,6 +126,10 @@ export default function PasswordRecoveryForm({
       
       if (recoveryStep === 'method') {
         if (data.recoveryMethod === 'email') {
+          setRecoveryStep('email');
+          return;
+        } else {
+          // For SMS or WhatsApp, use the default email recovery for now
           setRecoveryStep('email');
           return;
         }
@@ -78,6 +146,14 @@ export default function PasswordRecoveryForm({
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <LoaderCircle className="animate-spin h-8 w-8 text-pharma-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 py-2 px-4">
@@ -121,7 +197,7 @@ export default function PasswordRecoveryForm({
                 <Smartphone className="w-6 h-6 text-pharma-500" />
                 <div className="flex flex-col">
                   <Label htmlFor="sms" className="font-medium">Enviar código por SMS</Label>
-                  <span className="text-sm text-gray-500">{maskedPhone}</span>
+                  <span className="text-sm text-gray-500">{getMaskedPhone()}</span>
                 </div>
               </div>
               
@@ -140,7 +216,7 @@ export default function PasswordRecoveryForm({
                 <Mail className="w-6 h-6 text-pharma-500" />
                 <div className="flex flex-col">
                   <Label htmlFor="email" className="font-medium">Enviar código por correo electrónico</Label>
-                  <span className="text-sm text-gray-500">{maskedEmail}</span>
+                  <span className="text-sm text-gray-500">{getMaskedEmail()}</span>
                 </div>
               </div>
               
@@ -159,7 +235,7 @@ export default function PasswordRecoveryForm({
                 <MessageSquare className="w-6 h-6 text-pharma-500" />
                 <div className="flex flex-col">
                   <Label htmlFor="whatsapp" className="font-medium">Enviar código por WhatsApp</Label>
-                  <span className="text-sm text-gray-500">{maskedPhone}</span>
+                  <span className="text-sm text-gray-500">{getMaskedPhone()}</span>
                 </div>
               </div>
             </div>
@@ -173,6 +249,7 @@ export default function PasswordRecoveryForm({
                 type="email"
                 placeholder="tu@email.com"
                 {...register('email')}
+                defaultValue={userEmail}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs">{errors.email.message}</p>
