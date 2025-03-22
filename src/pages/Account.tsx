@@ -19,28 +19,36 @@ export default function Account() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AccountTab>('contact-info');
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   
   useEffect(() => {
     // Check if authenticated with Supabase but profile not loaded
     const checkAuth = async () => {
-      setIsLoading(true);
-      if (isAuthenticated && !userProfile) {
+      if (!hasCheckedAuth) {
+        setIsLoading(true);
         try {
           const { user } = await getAuthUser();
-          if (!user) {
-            // If no user exists in Supabase, redirect to home
-            navigate('/');
+          
+          if (!user && !isLoggedIn) {
+            // If no user exists in Supabase and not logged in locally, redirect to home
+            toast.error("Necesitas iniciar sesión para acceder a esta página");
+            navigate('/', { replace: true });
+            return;
           }
+          
+          // Auth check completed
+          setHasCheckedAuth(true);
         } catch (error) {
           console.error("Error checking auth:", error);
           toast.error("Error al verificar la autenticación");
+        } finally {
+          setIsLoading(false);
         }
       }
-      setIsLoading(false);
     };
     
     checkAuth();
-  }, [isAuthenticated, userProfile, getAuthUser, navigate]);
+  }, [isAuthenticated, isLoggedIn, userProfile, getAuthUser, navigate, hasCheckedAuth]);
 
   useEffect(() => {
     // Parse the tab from URL query params
@@ -56,12 +64,7 @@ export default function Account() {
     navigate(`/account?tab=${tab}`);
   };
 
-  // Check if user is authenticated using both auth systems
-  if (!isLoading && !isLoggedIn && !isAuthenticated) {
-    toast.error("Necesitas iniciar sesión para acceder a esta página");
-    return <Navigate to="/" />;
-  }
-
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 mb-10 flex justify-center items-center min-h-[60vh]">
@@ -71,6 +74,11 @@ export default function Account() {
         </div>
       </div>
     );
+  }
+
+  // If authentication check completed and user is not logged in, redirect will happen in the effect
+  if (hasCheckedAuth && !isLoggedIn && !isAuthenticated) {
+    return null; // Return null to avoid flashing content before redirect
   }
 
   return (

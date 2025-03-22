@@ -2,14 +2,13 @@
 import { useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserContext } from '@/components/auth/UserProvider';
-import { User, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/account/UserAvatar';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserNavigation() {
   const { openAuth, closeAuth, isAuthenticated } = useAuth();
-  const { login } = useUserContext();
   const navigate = useNavigate();
   
   // Clean up any auth dialogs when component unmounts
@@ -31,12 +30,6 @@ export default function UserNavigation() {
       openAuth(type);
     }, 0);
   }, [openAuth]);
-
-  // For demo purposes - provides a quick way to "mock" login
-  const handleQuickLogin = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    login();
-  }, [login]);
 
   // Handle account navigation
   const handleAccountNavigation = useCallback((e: React.MouseEvent) => {
@@ -73,14 +66,6 @@ export default function UserNavigation() {
             >
               Regístrate
             </Button>
-            <Button 
-              variant="secondary" 
-              onClick={handleQuickLogin} 
-              size="sm"
-            >
-              <User className="mr-1 h-4 w-4" />
-              Demo Login
-            </Button>
           </div>
           
           <div className="md:hidden">
@@ -90,7 +75,6 @@ export default function UserNavigation() {
               className="flex items-center" 
               onClick={(e) => handleOpenAuth('login', e)}
             >
-              <User className="h-4 w-4 mr-2" />
               <span>Accede</span>
             </Button>
           </div>
