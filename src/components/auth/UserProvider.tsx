@@ -53,6 +53,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 gender: userData.gender as 'male' | 'female',
                 avatarUrl: '/lovable-uploads/4265f32c-8521-4ac5-b03c-473b75811c78.png'
               };
+              
+              // Clear any previous mock data and use the actual user data
+              localStorage.removeItem('ft_user_profile');
+              
               userState.login();
               userState.updateUserProfile(userProfile);
               toast({
@@ -66,6 +70,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           // If a user signs out through Supabase, also log them out from the user context
           userState.logout();
+          
+          // Clear local storage to prevent mock data from being loaded
+          localStorage.removeItem('ft_is_logged_in');
+          localStorage.removeItem('ft_user_profile');
+          localStorage.removeItem('ft_addresses');
+          localStorage.removeItem('ft_purchases');
+          localStorage.removeItem('ft_favorites');
+          
           toast({
             title: "Sesión cerrada",
             description: "Has cerrado sesión exitosamente",
@@ -92,6 +104,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (data.session?.user && !userState.userProfile) {
         const userData = data.session.user.user_metadata;
         if (userData) {
+          // Clear any previous mock data
+          localStorage.removeItem('ft_user_profile');
+          
           const userProfile: UserProfile = {
             id: data.session.user.id,
             name: userData.first_name || '',
