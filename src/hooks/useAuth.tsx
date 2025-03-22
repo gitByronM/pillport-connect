@@ -1,5 +1,5 @@
 
-import { useAuthContext } from '@/components/auth/UserProvider';
+import { useAuthContext } from '@/components/auth/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useAuth() {
